@@ -5,22 +5,52 @@ local job = require("plenary.job")
 local battery_count = nil
 local battery_percent = nil
 local initialized = false
-local function temp()
-  -- Create a timer handle (implementation detail: uv_timer_t).
-  local timer = vim.loop.new_timer()
-  local i = 0
-  -- Waits 1000ms, then repeats every 750ms until timer:close().
-  timer:start(1000, 750, function()
-    print("timer invoked! i=" .. tostring(i))
-    if i > 4 then
-      timer:close() -- Always close handles to avoid leaks.
-    end
-    i = i + 1
-  end)
-  print("sleeping")
-end
+
+-- https://www.nerdfonts.com/cheat-sheet
+local no_battery_icon = "" -- "ﲾ"
+local charging_battery_icons = {
+  { "", 20 },
+  { "", 30 },
+  { "", 40 },
+  { "", 60 },
+  { "", 80 },
+  { "", 90 },
+  { "", 100 },
+}
+local plugged_icon = "ﮣ"
+local unplugged_icon = "ﮤ"
+local discharging_battery_icons = {
+  { "", 10 },
+  { "", 20 },
+  { "", 30 },
+  { "", 40 },
+  { "", 50 },
+  { "", 60 },
+  { "", 70 },
+  { "", 80 },
+  { "", 90 },
+  { "", 100 },
+}
+--[[
+battery_count and battery_percent are variables that get updated by jobs on a timer.
+When the plugin is setup it starts the battery count job, which runs once, and the
+battery percent job which runs every update_period_seconds
+
+TODO mac os version
+TODO linux version
+TODO handle multiple batteries properly
+]]
+--
+
 --TODO config
+-- TODO check for icons and if not available fallback to text
+-- TODO allow user to select no icons
+-- TODO maybe autodetect icons?
+-- TODO why is battery percent lower than vim version?
 local update_period_seconds = 10
+
+-- get battery status. 1 is battery and 2 is AC power (there are others)
+-- Get-CimInstance -ClassName Win32_Battery | Select-Object -Property BatteryStatus
 
 -- https://powershell.one/wmi/root/cimv2/win32_battery
 
@@ -40,26 +70,16 @@ local windows_get_battery_percent_job = job:new({
   end,
 })
 
-local windows_sleep_job = job:new({
-  command = "powershell",
-  args = { "sleep", update_period_seconds },
-})
-
-local function windows_get_battery_percent(wait, rep)
-  windows_get_battery_percent_job:after_success(function()
-    print("Battery charge " .. battery_percent)
-    if rep then
-      windows_sleep_job:after(function()
-        windows_get_battery_percent(wait, rep)
-      end)
-      windows_sleep_job:start()
-    end
+local function windows_get_battery_percent()
+  -- TODO validate period is sane
+  --    don't allow more than once per minute
+  local wait_millis = update_period_seconds * 1000
+  local timer = vim.loop.new_timer()
+  timer:start(0, wait_millis, function()
+    vim.schedule(function()
+      windows_get_battery_percent_job:start()
+    end)
   end)
-  windows_get_battery_percent_job:start()
-  if wait then
-    windows_get_battery_percent_job:wait()
-  end
-  return battery_percent
 end
 
 local windows_count_batteries_job = job:new({
@@ -76,9 +96,6 @@ local windows_count_batteries_job = job:new({
 })
 
 local function windows_count_batteries(wait)
-  windows_count_batteries_job:after_success(function()
-    print("Battery count " .. battery_count)
-  end)
   windows_count_batteries_job:start()
   if wait then
     windows_count_batteries_job:wait()
@@ -97,18 +114,33 @@ end
 
 local function init(config)
   if not initialized then
-    -- initialize the things
     if vim.fn.has("win32") == 1 then
-      windows_count_batteries(false)
-      -- windows_get_battery_percent(false, true)
+      windows_count_batteries()
+      windows_get_battery_percent()
+    else
+      vim.notify("No battery implementation for this platform")
     end
     initialized = true
   else
   end
 end
 
+local function discharging_battery_icon_for_percent(p)
+  for _, icon in ipairs(discharging_battery_icons) do
+    if tonumber(p) <= tonumber(icon[2]) then
+      return icon[1]
+    end
+  end
+  vim.notify("No icon found for percentage " .. p)
+  return "!"
+end
+
 local function get_status_line()
-  return battery_count
+  if battery_percent then
+    return discharging_battery_icon_for_percent(battery_percent) .. " " .. battery_percent .. "%%"
+  else
+    return "?"
+  end
 end
 
 M.count_batteries = count_batteries
