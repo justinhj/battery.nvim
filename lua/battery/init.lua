@@ -14,5 +14,6 @@ end
 M.setup = setup
 M.count_batteries = battery.count_batteries
 M.get_status_line = battery.get_status_line
+M.get_battery_status_sync = battery.get_battery_status_sync
 
 return M

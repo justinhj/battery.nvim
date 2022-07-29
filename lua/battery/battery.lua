@@ -5,6 +5,8 @@ local job = require("plenary.job")
 local battery_count = nil
 local battery_percent = nil
 local initialized = false
+-- 1 is battery, 2 is power
+local battery_status = nil
 
 -- https://www.nerdfonts.com/cheat-sheet
 local no_battery_icon = "" -- "ﲾ"
@@ -47,14 +49,13 @@ TODO handle multiple batteries properly
 -- TODO allow user to select no icons
 -- TODO maybe autodetect icons?
 -- TODO why is battery percent lower than vim version?
-local update_period_seconds = 10
+local update_period_seconds = 30
 
 -- get battery status. 1 is battery and 2 is AC power (there are others)
 -- Get-CimInstance -ClassName Win32_Battery | Select-Object -Property BatteryStatus
 
 -- https://powershell.one/wmi/root/cimv2/win32_battery
 
--- TODO this returns the average if multiple batteries, it would be cool to handle the array
 local windows_get_battery_percent_job = job:new({
   command = "powershell",
   args = {
@@ -64,22 +65,25 @@ local windows_get_battery_percent_job = job:new({
     if return_value == 0 then
       local bc = r:result()[1]
       battery_percent = bc
+      print("percent " .. battery_percent)
     else
-      vim.notify("Unable to count batteries")
+      vim.notify("Get battery percent failed. Code:" .. return_value, vim.log.levels.WARN)
     end
   end,
 })
 
-local function windows_get_battery_percent()
-  -- TODO validate period is sane
-  --    don't allow more than once per minute
-  local wait_millis = update_period_seconds * 1000
-  local timer = vim.loop.new_timer()
-  timer:start(0, wait_millis, function()
-    vim.schedule(function()
-      windows_get_battery_percent_job:start()
-    end)
-  end)
+local windows_get_battery_status_job = job:new({
+  command = "powershell",
+  args = { "(Get-CimInstance -ClassName Win32_Battery).BatteryStatus" },
+  on_exit = function(r, return_value)
+    print(vim.inspect(r))
+    battery_status = tonumber(r:result()[1])
+    print("battery status " .. battery_status)
+  end,
+})
+
+local function get_battery_status_sync()
+  windows_get_battery_status_job:start()
 end
 
 local windows_count_batteries_job = job:new({
@@ -88,7 +92,7 @@ local windows_count_batteries_job = job:new({
   on_exit = function(r, return_value)
     if return_value == 0 then
       local bc = r:result()[1]
-      battery_count = bc
+      battery_count = tonumber(bc)
     else
       vim.notify("Unable to count batteries")
     end
@@ -103,6 +107,26 @@ local function windows_count_batteries(wait)
   return battery_count
 end
 
+local function windows_start_timer_job()
+  -- TODO validate period is sane
+  --    don't allow more than once per minute
+  local wait_millis = update_period_seconds * 1000
+  local timer = vim.loop.new_timer()
+  timer:start(0, wait_millis, function()
+    windows_count_batteries_job:after_success(function()
+      print("batteries counted: " .. battery_count)
+      if battery_count > 0 then
+        print("got battery so...")
+        windows_get_battery_status_job:and_then(windows_get_battery_percent_job)
+        windows_get_battery_status_job:start()
+      else
+        print("no batter so no job")
+      end
+    end)
+    windows_count_batteries_job:start()
+  end)
+end
+
 local function get_charge_percent()
   return battery_percent
 end
@@ -115,8 +139,8 @@ end
 local function init(config)
   if not initialized then
     if vim.fn.has("win32") == 1 then
-      windows_count_batteries()
-      windows_get_battery_percent()
+      -- Start a timer and do all of the battery discovery
+      windows_start_timer_job()
     else
       vim.notify("No battery implementation for this platform")
     end
@@ -136,10 +160,16 @@ local function discharging_battery_icon_for_percent(p)
 end
 
 local function get_status_line()
+  -- TODO implement some options
+  --    allow toggle of whether to show something when no battery present
   if battery_percent then
-    return discharging_battery_icon_for_percent(battery_percent) .. " " .. battery_percent .. "%%"
+    if battery_status == 2 then
+      return discharging_battery_icon_for_percent(battery_percent) .. plugged_icon .. " " .. battery_percent .. "%%"
+    else
+      return discharging_battery_icon_for_percent(battery_percent) .. " " .. battery_percent .. "%%"
+    end
   else
-    return "?"
+    return "?" -- TODO maybe an hourglass or spinner
   end
 end
 
@@ -147,5 +177,5 @@ M.count_batteries = count_batteries
 M.get_charge_percent = get_charge_percent
 M.init = init
 M.get_status_line = get_status_line
-
+M.get_battery_status_sync = get_battery_status_sync
 return M
