@@ -56,74 +56,88 @@ local update_period_seconds = 30
 
 -- https://powershell.one/wmi/root/cimv2/win32_battery
 
-local windows_get_battery_percent_job = job:new({
-  command = "powershell",
-  args = {
-    "Get-CimInstance -ClassName Win32_Battery | Measure-Object -Property EstimatedChargeRemaining -Average | Select-Object -ExpandProperty Average",
-  },
-  on_exit = function(r, return_value)
-    if return_value == 0 then
-      local bc = r:result()[1]
-      battery_percent = bc
-      print("percent " .. battery_percent)
-    else
-      vim.notify("Get battery percent failed. Code:" .. return_value, vim.log.levels.WARN)
-    end
-  end,
-})
+-- Create a job that can get the windows battery percent charge using powershell
+local function windows_get_battery_percent_job()
+  return job:new({
+    command = "powershell",
+    args = {
+      "Get-CimInstance -ClassName Win32_Battery | Measure-Object -Property EstimatedChargeRemaining -Average | Select-Object -ExpandProperty Average",
+    },
+    on_exit = function(r, return_value)
+      if return_value == 0 then
+        local bc = r:result()[1]
+        battery_percent = bc
+        print("percent " .. battery_percent)
+      else
+        vim.notify("Get battery percent failed. Code:" .. return_value, vim.log.levels.WARN)
+      end
+    end,
+  })
+end
 
-local windows_get_battery_status_job = job:new({
-  command = "powershell",
-  args = { "(Get-CimInstance -ClassName Win32_Battery).BatteryStatus" },
-  on_exit = function(r, return_value)
-    print(vim.inspect(r))
-    battery_status = tonumber(r:result()[1])
-    print("battery status " .. battery_status)
-  end,
-})
+-- Create a job that can get the windows battery status using powershell
+local function windows_get_battery_status_job()
+  return job:new({
+    command = "powershell",
+    args = { "(Get-CimInstance -ClassName Win32_Battery).BatteryStatus" },
+    on_exit = function(r, return_value)
+      print(vim.inspect(r))
+      battery_status = tonumber(r:result()[1])
+      print("battery status " .. battery_status)
+    end,
+  })
+end
 
 local function get_battery_status_sync()
-  windows_get_battery_status_job:start()
+  local j = windows_get_battery_status_job()
+  j:start()
 end
 
-local windows_count_batteries_job = job:new({
-  command = "powershell",
-  args = { "@(Get-CimInstance win32_battery).Count" },
-  on_exit = function(r, return_value)
-    if return_value == 0 then
-      local bc = r:result()[1]
-      battery_count = tonumber(bc)
-    else
-      vim.notify("Unable to count batteries")
-    end
-  end,
-})
-
-local function windows_count_batteries(wait)
-  windows_count_batteries_job:start()
-  if wait then
-    windows_count_batteries_job:wait()
-  end
-  return battery_count
+local function windows_count_batteries_job()
+  return job:new({
+    command = "powershell",
+    args = { "@(Get-CimInstance win32_battery).Count" },
+    on_exit = function(r, return_value)
+      if return_value == 0 then
+        local bc = r:result()[1]
+        battery_count = tonumber(bc)
+      else
+        vim.notify("Unable to count batteries")
+      end
+    end,
+  })
 end
+
+-- local function windows_count_batteries(wait)
+--   windows_count_batteries_job:start()
+--   if wait then
+--     windows_count_batteries_job:wait()
+--   end
+--   return battery_count
+-- end
 
 local function windows_start_timer_job()
   -- TODO validate period is sane
   --    don't allow more than once per minute
   local wait_millis = update_period_seconds * 1000
   local timer = vim.loop.new_timer()
+
+  local count_batteries_job = windows_count_batteries_job()
+  local battery_status_job = windows_get_battery_status_job()
+  local battery_percentage_job = windows_get_battery_percent_job()
+
   timer:start(0, wait_millis, function()
-    windows_count_batteries_job:after_success(function()
+    count_batteries_job:after_success(function()
       print("batteries counted: " .. battery_count)
       if battery_count > 0 then
         print("got battery so...")
-        windows_get_battery_status_job:and_then(windows_get_battery_percent_job)
-        windows_get_battery_status_job:start()
+        battery_status_job:and_then(battery_percentage_job)
+        battery_status_job:start()
       else
         print("no batter so no job")
       end
     end)
-    windows_count_batteries_job:start()
+    count_batteries_job:start()
   end)
 end
 
@@ -142,7 +156,7 @@ local function init(config)
       -- Start a timer and do all of the battery discovery
       windows_start_timer_job()
     else
-      vim.notify("No battery implementation for this platform")
+      vim.notify("battery.nvim - No battery implementation for this platform", vim.log.levels.WARN)
     end
     initialized = true
   else
