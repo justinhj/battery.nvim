@@ -7,3 +7,7 @@ Features
 - Configurable update rate
 
 Inspired by [lambdalisue/battery.vim](https://github.com/lambdalisue/battery.vim).
+
+TODO install instructions via plug etc
+TODO add screen shot(s)
+WIP mac support
