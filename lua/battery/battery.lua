@@ -162,7 +162,7 @@ end
 
 local function init(config)
   if not initialized then
-    if vim.fn.executable("powershell") then
+    if vim.fn.executable("powershell") == 1 then
       count_batteries_job = powershell_count_batteries_job()
     end
 
