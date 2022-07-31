@@ -8,8 +8,10 @@ local initialized = false
 -- 1 is battery, 2 is power
 local battery_status = nil
 
--- On init this is set based on installed programs
+-- On init these are set based on installed programs
 local count_batteries_job = nil
+local get_charge_percent_job = nil
+local get_charging_status_job = nil -- TODO power or not
 
 -- https://www.nerdfonts.com/cheat-sheet
 local no_battery_icon = "" -- "ﲾ"
@@ -78,7 +80,7 @@ local function powershell_get_battery_percent_job()
   })
 end
 
--- Create a job that can get the windows battery status using powershell
+-- Create a job that can get the battery status using powershell
 local function powershell_get_battery_status_job()
   return job:new({
     command = "powershell",
@@ -113,15 +115,76 @@ local function powershell_count_batteries_job()
   })
 end
 
--- local function windows_count_batteries(wait)
---   windows_count_batteries_job:start()
---   if wait then
---     windows_count_batteries_job:wait()
---   end
---   return battery_count
--- end
+local function pmset_count_batteries_in_result(results)
+  local count = 0
+  for _, line in ipairs(results) do
+    if line:match("InternalBattery") then
+      count = count + 1
+    end
+  end
+  return count
+end
 
-local function windows_start_timer_job()
+--[[
+To count the batteries run pmset to get the output below then count the number of
+occurences of InternalBattery
+
+Note that the percentage change is also found here so it's probably a later move to
+cache this result and simply parse it when getting the percentage.
+
+> pmset -g ps
+Now drawing from 'Battery Power'
+ -InternalBattery-0 (id=6094947)	48%; discharging; 3:53 remaining present: true
+]]
+--
+local function pmset_count_batteries_job()
+  return job:new({
+    command = "pmset",
+    args = { "-g", "ps" },
+    on_exit = function(r, return_value)
+      if return_value == 0 then
+        battery_count = pmset_count_batteries_in_result(r:result())
+      else
+        print("Unable to count batteries: " .. return_value)
+      end
+    end,
+  })
+end
+
+local function pmset_get_charge_percent_from_result(results)
+  local batteries = 0
+  local percent_sum = 0
+  for _, line in ipairs(results) do
+    print("line " .. line)
+    local _, _, p = line:find("([0-9]+)%%")
+    if p then
+      print("p " .. p)
+      batteries = batteries + 1
+      percent_sum = percent_sum + tonumber(p)
+    end
+  end
+  if batteries == 0 then
+    return 0
+  else
+    return math.floor(percent_sum / batteries)
+  end
+end
+
+local function pmset_get_charge_percent_job()
+  return job:new({
+    command = "pmset",
+    args = { "-g", "ps" },
+    on_exit = function(r, return_value)
+      if return_value == 0 then
+        battery_percent = pmset_get_charge_percent_from_result(r:result())
+      else
+        print("Unable to count batteries: " .. return_value)
+      end
+    end,
+  })
+end
+
+local function start_timer_job()
   -- TODO validate period is sane
   --    don't allow more than once per minute
   local wait_millis = update_period_seconds * 1000
@@ -147,7 +210,12 @@ local function windows_start_timer_job()
 end
 
 local function get_charge_percent()
-  return battery_percent
+  if not initialized then
+    vim.notify("battery.nvm not initialized... run setup", vim.log.levels.ERROR)
+  else
+    get_charge_percent_job:sync()
+    return battery_percent
+  end
 end
 
 -- Discover and return the battery count
@@ -160,18 +228,24 @@ local function count_batteries()
   end
 end
 
+-- TODO for pmset consider consolidate to one job or
+-- cache result of job and use for rest
 local function init(config)
   if not initialized then
     if vim.fn.executable("powershell") == 1 then
       count_batteries_job = powershell_count_batteries_job()
+      get_charge_percent_job = powershell_get_battery_percent_job()
+    elseif vim.fn.executable("pmset") == 1 then
+      count_batteries_job = pmset_count_batteries_job()
+      get_charge_percent_job = pmset_get_charge_percent_job()
     end
 
-    if vim.fn.has("win32") == 1 then
-      -- Start a timer and do all of the battery discovery
-      windows_start_timer_job()
-    else
-      vim.notify("battery.nvim - No battery implementation for this platform", vim.log.levels.WARN)
-    end
+    -- if vim.fn.has("win32") == 1 then
+    --   -- Start a timer and do all of the battery discovery
+    --   start_timer_job()
+    -- else
+    --   vim.notify("battery.nvim - No battery implementation for this platform", vim.log.levels.WARN)
+    -- end
     initialized = true
   else
   end
