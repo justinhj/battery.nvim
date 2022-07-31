@@ -17,5 +17,7 @@ Inspired by [lambdalisue/battery.vim](https://github.com/lambdalisue/battery.vim
 * TODO add screen shot(s)
 * WIP mac support
 * TODO linux support
+* TODO horizontal icon option
+* TODO possibly show charge remaining (bonus points for on mouse hover)
 
 Copyright (c) 2022 Justin Heyes-Jones
