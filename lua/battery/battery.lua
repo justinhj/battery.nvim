@@ -8,6 +8,9 @@ local initialized = false
 -- 1 is battery, 2 is power
 local battery_status = nil
 
+-- On init this is set based on installed programs
+local count_batteries_job = nil
+
 -- https://www.nerdfonts.com/cheat-sheet
 local no_battery_icon = "" -- "ﲾ"
 local charging_battery_icons = {
@@ -56,8 +59,8 @@ local update_period_seconds = 30
 
 -- https://powershell.one/wmi/root/cimv2/win32_battery
 
--- Create a job that can get the windows battery percent charge using powershell
-local function windows_get_battery_percent_job()
+-- Get battery percent using powershell
+local function powershell_get_battery_percent_job()
   return job:new({
     command = "powershell",
     args = {
@@ -76,7 +79,7 @@ local function windows_get_battery_percent_job()
 end
 
 -- Create a job that can get the windows battery status using powershell
-local function windows_get_battery_status_job()
+local function powershell_get_battery_status_job()
   return job:new({
     command = "powershell",
     args = { "(Get-CimInstance -ClassName Win32_Battery).BatteryStatus" },
@@ -89,11 +92,13 @@ local function windows_get_battery_status_job()
 end
 
 local function get_battery_status_sync()
-  local j = windows_get_battery_status_job()
-  j:start()
+  -- TODO this should call the job based on the initialized status
+  local j = powershell_get_battery_status_job()
+  j:sync()
+  return battery_status
 end
 
-local function windows_count_batteries_job()
+local function powershell_count_batteries_job()
   return job:new({
     command = "powershell",
     args = { "@(Get-CimInstance win32_battery).Count" },
@@ -122,9 +127,9 @@ local function windows_start_timer_job()
   local wait_millis = update_period_seconds * 1000
   local timer = vim.loop.new_timer()
 
-  local count_batteries_job = windows_count_batteries_job()
-  local battery_status_job = windows_get_battery_status_job()
-  local battery_percentage_job = windows_get_battery_percent_job()
+  local count_batteries_job = powershell_count_batteries_job()
+  local battery_status_job = powershell_get_battery_status_job()
+  local battery_percentage_job = powershell_get_battery_percent_job()
 
   timer:start(0, wait_millis, function()
     count_batteries_job:after_success(function()
@@ -147,11 +152,20 @@ end
 
 -- Discover and return the battery count
 local function count_batteries()
-  return battery_count
+  if not initialized then
+    vim.notify("battery.nvm not initialized... run setup", vim.log.levels.ERROR)
+  else
+    count_batteries_job:sync()
+    return battery_count
+  end
 end
 
 local function init(config)
   if not initialized then
+    if vim.fn.executable("powershell") then
+      count_batteries_job = powershell_count_batteries_job()
+    end
+
     if vim.fn.has("win32") == 1 then
       -- Start a timer and do all of the battery discovery
       windows_start_timer_job()
@@ -187,9 +201,8 @@ local function get_status_line()
   end
 end
 
+M.init = init
 M.count_batteries = count_batteries
 M.get_charge_percent = get_charge_percent
-M.init = init
 M.get_status_line = get_status_line
-M.get_battery_status_sync = get_battery_status_sync
 return M
