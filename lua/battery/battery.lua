@@ -5,13 +5,12 @@ local job = require("plenary.job")
 local battery_count = nil
 local battery_percent = nil
 local initialized = false
--- 1 is battery, 2 is power
-local battery_status = nil
+local battery_is_charging = nil
 
 -- On init these are set based on installed programs
 local count_batteries_job = nil
 local get_charge_percent_job = nil
-local get_charging_status_job = nil -- TODO power or not
+local is_charging_job = nil -- TODO power or not
 
 -- https://www.nerdfonts.com/cheat-sheet
 local no_battery_icon = "" -- "ﲾ"
@@ -86,18 +85,24 @@ local function powershell_get_battery_status_job()
     command = "powershell",
     args = { "(Get-CimInstance -ClassName Win32_Battery).BatteryStatus" },
     on_exit = function(r, return_value)
-      print(vim.inspect(r))
-      battery_status = tonumber(r:result()[1])
-      print("battery status " .. battery_status)
+      local status = tonumber(r:result()[1])
+      if status == 2 then
+        battery_is_charging = true
+      else
+        battery_is_charging = false -- TODO some device drivers may have more complex behaviour, see docs
+      end
+      print("battery status " .. vim.inspect(battery_is_charging))
     end,
   })
 end
 
-local function get_battery_status_sync()
-  -- TODO this should call the job based on the initialized status
-  local j = powershell_get_battery_status_job()
-  j:sync()
-  return battery_status
+local function get_battery_status()
+  if not initialized then
+    vim.notify("battery.nvm not initialized... run setup", vim.log.levels.ERROR)
+  else
+    is_charging_job:sync()
+    return battery_is_charging
+  end
 end
 
 local function powershell_count_batteries_job()
@@ -184,6 +189,10 @@ local function pmset_get_charge_percent_job()
   })
 end
 
+local function pmset_get_battery_status_job()
+  print("oh no!")
+end
+
 local function start_timer_job()
   -- TODO validate period is sane
   --    don't allow more than once per minute
@@ -218,6 +227,15 @@ local function get_charge_percent()
   end
 end
 
+local function is_charging()
+  if not initialized then
+    vim.notify("battery.nvm not initialized... run setup", vim.log.levels.ERROR)
+  else
+    is_charging_job:sync()
+    return battery_is_charging
+  end
+end
+
 -- Discover and return the battery count
 local function count_batteries()
   if not initialized then
@@ -235,9 +253,11 @@ local function init(config)
     if vim.fn.executable("powershell") == 1 then
       count_batteries_job = powershell_count_batteries_job()
       get_charge_percent_job = powershell_get_battery_percent_job()
+      is_charging_job = powershell_get_battery_status_job() -- TODO naming consistency
     elseif vim.fn.executable("pmset") == 1 then
       count_batteries_job = pmset_count_batteries_job()
       get_charge_percent_job = pmset_get_charge_percent_job()
+      is_charging_job = pmset_get_battery_status_job()
     end
 
     -- if vim.fn.has("win32") == 1 then
@@ -251,6 +271,7 @@ local function init(config)
   end
 end
 
+-- Convert percentage change to discharging icon
 local function discharging_battery_icon_for_percent(p)
   for _, icon in ipairs(discharging_battery_icons) do
     if tonumber(p) <= tonumber(icon[2]) then
@@ -278,5 +299,6 @@ end
 M.init = init
 M.count_batteries = count_batteries
 M.get_charge_percent = get_charge_percent
+M.is_charging = is_charging
 M.get_status_line = get_status_line
 return M
