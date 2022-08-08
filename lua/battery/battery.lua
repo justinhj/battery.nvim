@@ -100,8 +100,11 @@ end
 
 local function setup(config)
   if config then
-    local config_update_rate_seconds = tonumber(config.update_rate_seconds) or 0
-    if config_update_rate_seconds >= 10 then
+    local config_update_rate_seconds = tonumber(config.update_rate_seconds)
+    if config_update_rate_seconds then
+      if config_update_rate_seconds < 10 then
+        vim.notify("Update rate less than 10 seconds is not recommended", vim.log.levels.WARN)
+      end
       update_rate_seconds = config_update_rate_seconds
     end
   end
