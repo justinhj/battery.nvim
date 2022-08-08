@@ -37,50 +37,35 @@ local discharging_battery_icons = {
   { "", 90 },
   { "", 100 },
 }
---[[
-battery_count and battery_percent are variables that get updated by jobs on a timer.
-When the plugin is setup it starts the battery count job, which runs once, and the
-battery percent job which runs every update_rate_seconds
 
-TODO mac os version
-TODO linux version
-TODO handle multiple batteries properly
-]]
---
+-- TODO maybe store the update time here?
+local battery_status = {
+  percent_charge_remaining = nil,
+  battery_count = nil,
+  ac_power = nil,
+}
 
-local function get_charge_percent()
-  print("deprecated")
+-- Gets the last updated battery information
+-- TODO may add the ability to ask for it to be updated right now
+local function get_battery_status()
+  return battery_status
 end
 
-local function is_charging()
-  print("deprecated")
-end
-
--- Discover and return the battery count
-local function count_batteries()
-  print("deprecated")
-end
-
+-- This maps to a timer sequence number in the utils module so the user
+-- can reload the battery module and we can detect the old job is still running.
 local timer = nil
-local stop = nil
 
 local function timer_loop()
   vim.defer_fn(function()
     log.debug(timer .. " is running now")
 
-    -- Two ways to stop the timer ... setting the stop variable to true
-    -- or if the code is reloaded the user has no access to the timer
-    -- it will stop if the timer var doesn't match the global one
-    -- in timers
+    -- When the user reloads the battery module the job can just keep running. In order to stop it
+    -- the user must call stop_timer. All this does is increments the timer sequence number. Whenever
+    -- the running job knows that the sequence number no longer matches it will stop running,
+    -- regardless of whether the user made a new job or not.
 
     if require("util.timers").get_current() ~= timer then
-      stop = true
-      log.info("stopping as someone else is using timer")
-    end
-
-    if stop == true then
-      log.debug("Stopping")
-      stop = false
+      log.info("Update job stopping due to newer timer.")
     else
       timer_loop()
     end
@@ -88,8 +73,8 @@ local function timer_loop()
 end
 
 local function stop_timer()
-  log.debug("Stop timer. timer number is " .. timer)
-  stop = true
+  timer = require("util.timers").get_next()
+  log.debug("Incremented timer to " .. timer .. " to stop the battery update job")
 end
 
 local function start_timer()
@@ -139,8 +124,6 @@ local function get_status_line()
 end
 
 M.setup = setup
-M.count_batteries = count_batteries
-M.get_charge_percent = get_charge_percent
-M.is_charging = is_charging
+M.get_battery_status = get_battery_status
 M.get_status_line = get_status_line
 return M
