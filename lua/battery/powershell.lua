@@ -1,5 +1,8 @@
 -- Getting battery info with Powershell. Requires Windows.
 local J = require("plenary.job")
+local L = require("plenary.log")
+
+local log = L.new({ plugin = "battery.powershell" })
 
 -- Info about battery based on Status field of win32 Battery
 -- see https://powershell.one/wmi/root/cimv2/win32_battery#battery-status
@@ -36,7 +39,7 @@ local get_battery_info_powershell_command = {
 
 -- Parse the response from the batter info job and update
 -- the battery status
-local function parse_powershell_battery_info(result)
+local function parse_powershell_battery_info(result, battery_status)
   local count = 0
   local charge_total = 0
   local ac_power = nil
@@ -60,29 +63,26 @@ local function parse_powershell_battery_info(result)
   end
 
   if count > 0 then
-    return {
-      percent_charge_remaining = math.floor(charge_total / count),
-      battery_count = count,
-      ac_power = ac_power,
-    }
+    battery_status.percent_charge_remaining = math.floor(charge_total / count)
+    battery_status.battery_count = count
+    battery_status.ac_power = ac_power
   else
-    return {
-      percent_charge_remaining = 100,
-      battery_count = count,
-      ac_power = true,
-    }
+    battery_status.percent_charge_remaining = 100
+    battery_status.battery_count = count
+    battery_status.ac_power = true
   end
 end
 
 -- Create a plenary job to get the battery info
-local function powershell_get_battery_info_job()
+-- battery_status is a table to store the results in
+local function get_battery_info_job(battery_status)
   return J:new({
     command = "powershell",
     args = get_battery_info_powershell_command,
     on_exit = function(r, return_value)
       if return_value == 0 then
-        parse_powershell_battery_info(r:result())
-        print(vim.inspect(battery_status)) -- TODO remove
+        parse_powershell_battery_info(r:result(), battery_status)
+        log.debug(vim.inspect(battery_status))
       else
         vim.schedule(function()
           vim.notify("battery.nvim: Error getting battery info", vim.log.levels.ERROR)
@@ -92,36 +92,6 @@ local function powershell_get_battery_info_job()
   })
 end
 
--- Select the battery info job to run based on platform and what programs
--- are available
-local function select_job()
-  if vim.fn.has("win32") and vim.fn.executable("powershell") == 1 then
-    return powershell_get_battery_info_job()
-    -- elseif vim.fn.executable("pmset") == 1 then
-  else
-    return nil
-  end
-end
-
-local function update_battery(count, delay)
-  print("get battery: ", count)
-  local job = select_job()
-  if not job then
-    vim.notify("battery.nvim: Unsupported OS", vim.log.levels.WARN)
-  else
-    job:after_success(function()
-      print("battery: " .. battery_status.percent_charge_remaining)
-      if count > 1 then
-        count = count - 1
-        vim.defer_fn(function()
-          update_battery(count, delay)
-        end, delay)
-      else
-        print("finished!")
-      end
-    end)
-    job:start()
-  end
-end
-
-update_battery(3, 6000)
+return {
+  get_battery_info_job = get_battery_info_job,
+}

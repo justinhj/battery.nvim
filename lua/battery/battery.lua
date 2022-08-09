@@ -1,7 +1,8 @@
 local M = {}
 
-local J = require("plenary.job")
 local L = require("plenary.log")
+local powershell = require("battery.powershell")
+-- TODO pmset
 
 --WIP config
 -- TODO check for icons and if not available fallback to text
@@ -55,9 +56,27 @@ end
 -- can reload the battery module and we can detect the old job is still running.
 local timer = nil
 
+-- Select the battery info job to run based on platform and what programs
+-- are available
+local function select_job()
+  if vim.fn.has("win32") and vim.fn.executable("powershell") == 1 then
+    log.debug("windows powershell battery job")
+    return powershell.get_battery_info_job
+  elseif vim.fn.executable("pmset") == 1 then
+    log.debug("pmset battery job")
+  else
+    log.debug("no battery job")
+  end
+end
+
 local function timer_loop()
   vim.defer_fn(function()
     log.debug(timer .. " is running now")
+    local job_function = select_job()
+
+    if job_function then
+      job_function(battery_status):start()
+    end
 
     -- When the user reloads the battery module the job can just keep running. In order to stop it
     -- the user must call stop_timer. All this does is increments the timer sequence number. Whenever
