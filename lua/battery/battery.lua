@@ -98,6 +98,14 @@ end
 
 local function start_timer()
   timer = require("util.timers").get_next()
+
+  -- Always call the job immediately before starting the timed loop
+  local job_function = select_job()
+
+  if job_function then
+    job_function(battery_status):start()
+  end
+
   timer_loop()
   log.debug("start timer seq no " .. timer)
 end
@@ -128,18 +136,24 @@ local function discharging_battery_icon_for_percent(p)
 end
 
 local function get_status_line()
-  -- -- TODO implement some options
-  -- --    allow toggle of whether to show something when no battery present
-  -- if battery_percent then
-  --   if battery_status == 2 then
-  --     return discharging_battery_icon_for_percent(battery_percent) .. plugged_icon .. " " .. battery_percent .. "%%"
-  --   else
-  --     return discharging_battery_icon_for_percent(battery_percent) .. " " .. battery_percent .. "%%"
-  --   end
-  -- else
-  --   return "?" -- TODO maybe an hourglass or spinner
-  -- end
-  return "?"
+  -- TODO implement some options
+  -- Handle pre-init
+  if battery_status.battery_count == nil then
+    return "?"
+  else
+    if battery_status.battery_count == 0 then
+      return no_battery_icon
+    else
+      local ac_power = battery_status.ac_power
+      local battery_percent = battery_status.percent_charge_remaining
+
+      if ac_power then
+        return discharging_battery_icon_for_percent(battery_percent) .. plugged_icon .. " " .. battery_percent .. "%%"
+      else
+        return discharging_battery_icon_for_percent(battery_percent) .. " " .. battery_percent .. "%%"
+      end
+    end
+  end
 end
 
 M.setup = setup
