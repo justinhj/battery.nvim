@@ -24,6 +24,15 @@ local charging_battery_icons = {
   { "", 90 },
   { "", 100 },
 }
+
+local sideways_battery_icons = {
+  { "", 5 },
+  { "", 25 },
+  { "", 50 },
+  { "", 75 },
+  { "", 100 },
+}
+
 local plugged_icon = "ﮣ"
 local unplugged_icon = "ﮤ"
 local discharging_battery_icons = {
@@ -140,7 +149,7 @@ local function get_status_line()
   -- TODO implement some options
   -- Handle pre-init
   if battery_status.battery_count == nil then
-    return "?"
+    return ""
   else
     if battery_status.battery_count == 0 then
       return no_battery_icon
