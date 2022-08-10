@@ -85,7 +85,7 @@ local function get_battery_info_job(battery_status)
         log.debug(vim.inspect(battery_status))
       else
         vim.schedule(function()
-          vim.notify("battery.nvim: Error getting battery info", vim.log.levels.ERROR)
+          vim.notify("battery.nvim: Error getting battery info with Powershell", vim.log.levels.ERROR)
         end)
       end
     end,
