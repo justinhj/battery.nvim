@@ -15,9 +15,15 @@ Inspired by [lambdalisue/battery.vim](https://github.com/lambdalisue/battery.vim
 ## Roadmap
 * TODO install instructions via plug etc
 * TODO add screen shot(s)
-* WIP mac support
+* DONE mac support
 * TODO linux support
 * TODO horizontal icon option
 * TODO possibly show charge remaining (bonus points for on mouse hover)
+* TODO WIP rewrite based on learnings
+* TODO module name should be battery.nvim 
+* TODO make a non-reloading module for time uniqueness 
+* TODO Option for what to show when no battery 
+* TODO add debug only logging
+* TODO WISHLIST react to system events in realtime (somehow)
 
 Copyright (c) 2022 Justin Heyes-Jones

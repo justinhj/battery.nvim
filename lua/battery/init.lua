@@ -1,20 +1,8 @@
 local M = {}
 
-local job = require("plenary.job")
 local battery = require("battery.battery")
 
-local config = {}
-
-local function setup(args)
-  -- TODO validate the config and have config variables
-  config = args
-  battery.init(config)
-end
-
-M.setup = setup
-M.count_batteries = battery.count_batteries
+M.setup = battery.setup
+M.get_battery_status = battery.get_battery_status
 M.get_status_line = battery.get_status_line
-M.get_charge_percent = battery.get_charge_percent
-M.is_charging = battery.is_charging
-
 return M
