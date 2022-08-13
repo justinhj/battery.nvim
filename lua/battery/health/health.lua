@@ -9,7 +9,7 @@ local function check_setup()
 end
 
 M.check = function()
-  health.report_start("battery.nvim report")
+  health.report_start("battery report")
   -- make sure setup function parameters are ok
   if check_setup() then
     health.report_ok("Setup function is correct")
