@@ -52,7 +52,7 @@ local function parse_pmset_battery_info(result, battery_status)
   if count > 0 then
     battery_status.percent_charge_remaining = math.floor(charge_total / count)
     battery_status.battery_count = count
-    battery_status.ac_power = false
+    battery_status.ac_power = ac_power
   else
     battery_status.percent_charge_remaining = 100
     battery_status.battery_count = count

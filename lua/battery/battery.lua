@@ -3,13 +3,12 @@ local M = {}
 local L = require("plenary.log")
 local powershell = require("battery.powershell")
 local pmset = require("battery.pmset")
+local config = require("battery.config")
 
---WIP config
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
 -- TODO maybe autodetect icons?
 -- TODO why is battery percent lower than vim version?
-local update_rate_seconds = 30
 
 local log = L.new({ plugin = "battery" })
 
@@ -98,7 +97,7 @@ local function timer_loop()
     else
       timer_loop()
     end
-  end, update_rate_seconds * 1000)
+  end, config.current.update_rate_seconds * 1000)
 end
 
 local function stop_timer()
@@ -120,14 +119,13 @@ local function start_timer()
   log.debug("start timer seq no " .. timer)
 end
 
-local function setup(config)
-  if config then
-    local config_update_rate_seconds = tonumber(config.update_rate_seconds)
-    if config_update_rate_seconds then
-      if config_update_rate_seconds < 10 then
-        vim.notify("Update rate less than 10 seconds is not recommended", vim.log.levels.WARN)
-      end
-      update_rate_seconds = config_update_rate_seconds
+local function setup(user_opts)
+  config.from_user_opts(user_opts)
+
+  local config_update_rate_seconds = tonumber(config.current.update_rate_seconds)
+  if config_update_rate_seconds then
+    if config_update_rate_seconds < 10 then
+      vim.notify("Update rate less than 10 seconds is not recommended", vim.log.levels.WARN)
     end
   end
 
@@ -152,16 +150,28 @@ local function get_status_line()
     return ""
   else
     if battery_status.battery_count == 0 then
-      return no_battery_icon
+      if config.current.show_status_when_no_battery == true then
+        return no_battery_icon
+      else
+        return ""
+      end
     else
       local ac_power = battery_status.ac_power
       local battery_percent = battery_status.percent_charge_remaining
 
-      if ac_power then
-        return discharging_battery_icon_for_percent(battery_percent) .. plugged_icon .. " " .. battery_percent .. "%%"
-      else
-        return discharging_battery_icon_for_percent(battery_percent) .. " " .. battery_percent .. "%%"
+      local plug_icon = ""
+      if ac_power and config.current.show_plugged_icon then
+        plug_icon = plugged_icon
+      elseif not ac_power and config.current.show_unplugged_icon then
+        plug_icon = unplugged_icon
       end
+
+      local percent = ""
+      if config.current.show_percent == true then
+        percent = " " .. battery_percent .. "%%"
+      end
+
+      return discharging_battery_icon_for_percent(battery_percent) .. plug_icon .. percent
     end
   end
 end
