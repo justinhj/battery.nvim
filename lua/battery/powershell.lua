@@ -2,7 +2,7 @@
 local J = require("plenary.job")
 local L = require("plenary.log")
 
-local log = L.new({ plugin = "battery.powershell" })
+local log = L.new({ plugin = "battery" })
 
 -- Info about battery based on Status field of win32 Battery
 -- see https://powershell.one/wmi/root/cimv2/win32_battery#battery-status

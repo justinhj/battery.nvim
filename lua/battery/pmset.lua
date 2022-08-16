@@ -3,7 +3,7 @@
 local J = require("plenary.job")
 local L = require("plenary.log")
 
-local log = L.new({ plugin = "battery.pmset" })
+local log = L.new({ plugin = "battery" })
 
 local get_battery_info_pmset_args = {
   "-g",
