@@ -12,6 +12,7 @@ local default_config = {
   show_plugged_icon = true,
   show_unplugged_icon = true,
   show_percent = true,
+  vertical_icons = true,
 }
 
 M.current = default_config

@@ -24,7 +24,7 @@ local charging_battery_icons = {
   { "", 100 },
 }
 
-local sideways_battery_icons = {
+local horizontal_battery_icons = {
   { "", 5 },
   { "", 25 },
   { "", 50 },
@@ -132,9 +132,10 @@ local function setup(user_opts)
   start_timer()
 end
 
--- Convert percentage change to discharging icon
-local function discharging_battery_icon_for_percent(p)
-  for _, icon in ipairs(discharging_battery_icons) do
+-- Convert percentage charge to icon given a table of icons
+-- and max charge for that icon
+local function icon_for_percentage(p, icon_table)
+  for _, icon in ipairs(icon_table) do
     if tonumber(p) <= tonumber(icon[2]) then
       return icon[1]
     end
@@ -143,9 +144,15 @@ local function discharging_battery_icon_for_percent(p)
   return "!"
 end
 
+local function discharging_battery_icon_for_percent(p)
+  return icon_for_percentage(p, discharging_battery_icons)
+end
+
+local function horizontal_battery_icon_for_percent(p)
+  return icon_for_percentage(p, horizontal_battery_icons)
+end
+
 local function get_status_line()
-  -- TODO implement some options
-  -- Handle pre-init
   if battery_status.battery_count == nil then
     return ""
   else
@@ -171,7 +178,14 @@ local function get_status_line()
         percent = " " .. battery_percent .. "%%"
       end
 
-      return discharging_battery_icon_for_percent(battery_percent) .. plug_icon .. percent
+      local icon = ""
+      if config.current.vertical_icons == true then
+        icon = discharging_battery_icon_for_percent(battery_percent)
+      else
+        icon = horizontal_battery_icon_for_percent(battery_percent)
+      end
+
+      return icon .. plug_icon .. percent
     end
   end
 end
