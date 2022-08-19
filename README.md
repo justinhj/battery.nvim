@@ -2,7 +2,7 @@
 Neovim plugin to collect and view information on battery power in your status line.
 
 <p>
-<img style="max-width: 40%;" src="https://justinhj.github.io/images/battery/statuslineexample.png"/>
+<img width="40%" src="https://justinhj.github.io/images/battery/statuslineexample.png"/>
 </p>
 
 ## What?
