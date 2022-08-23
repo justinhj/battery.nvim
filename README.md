@@ -29,12 +29,20 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 - [kyazdani42/nvim-web-devicons](https://github.com/kyazdani42/nvim-web-devicons)
 
 ## Installation
-Use your package manager to add the dependencies and the plugin. I use [Plug](https://github.com/junegunn/vim-plug).
+Use your package manager to add the dependencies and the plugin. 
+
+### [Plug](https://github.com/junegunn/vim-plug)
 
 ```
 Plug 'nvim-lua/plenary.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'justinhj/battery.nvim'
+```
+
+### [Packer](https://github.com/wbthomason/packer.nvim)
+
+```
+use { 'justinhj/battery.nvim', requires = {{'kyazdani42/nvim-web-devicons'}, {'nvim-lua/plenary.nvim'}}}
 ```
 
 ## Configuration
@@ -56,7 +64,7 @@ battery.setup({
 END
 ```
 
-## Adding to lualine
+## Adding to [lualine](https://github.com/nvim-lualine/lualine.nvim)
 Ensure minimal setup in your config.
 ```
 lua require"battery".setup({})
@@ -74,6 +82,27 @@ local nvimbattery = {
 Add it where you want it, something like below.
 ```
 sections = { lualine_a = nvimbattery }
+```
+
+## Adding to [galaxyline](https://github.com/glepnir/galaxyline.nvim)
+
+Add this to your galaxy line config in the section you want:
+
+```
+local gl = require 'galaxyline'
+local gls = gl.section
+
+-- in this example 5th section on the right, change as needed!
+gls.right[5] = {
+  BatteryNvim = {
+    provider = function()
+        return require 'battery'.get_status_line()
+    end,
+    separator = '',
+    separator_highlight = { colors.bg, colors.purple },
+    highlight = { colors.grey, colors.purple },
+  },
+}
 ```
 
 ## Diagnostics and debugging
