@@ -3,6 +3,7 @@ local M = {}
 local L = require("plenary.log")
 local powershell = require("battery.powershell")
 local pmset = require("battery.pmset")
+local acpi = require("battery.acpi")
 local config = require("battery.config")
 
 -- TODO check for icons and if not available fallback to text
@@ -73,6 +74,9 @@ local function select_job()
   elseif vim.fn.executable("pmset") == 1 then
     log.debug("pmset battery job")
     return pmset.get_battery_info_job
+  elseif vim.fn.executable("acpi") == 1 then
+    log.debug("acpi battery job")
+    return acpi.get_battery_info_job
   else
     log.debug("no battery job")
   end
