@@ -21,7 +21,7 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 - Configurable update rate
 - Powershell for Windows battery information
 - pmset Apple Mac OSx battery information
-- Linux not yet supported
+- Linux support via acpi
 
 ## Required dependencies
 
