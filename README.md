@@ -46,7 +46,7 @@ use { 'justinhj/battery.nvim', requires = {{'kyazdani42/nvim-web-devicons'}, {'n
 ```
 
 ## Configuration
-Just installed the plugin is not useful, you need to run the setup function and pass in an optional config. This starts the internal timer so that the battery status is updated periodically. Since the process to get the battery can take a second or two, even though it happens in the background, I don't recommend setting it below about 10 seconds, and several minutes should be fine for most purposes. Running `setup` will always refresh the battery status.
+Once installed you need to run the setup function and pass in an optional config. This starts the internal timer so that the battery status is updated periodically. Since the process to get the battery can take a second or two, even though it happens in the background, I don't recommend setting it below about 10 seconds, and several minutes should be fine for most purposes. Running `setup` will always refresh the battery status.
 
 There are some configuration options.
 
