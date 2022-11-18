@@ -1,5 +1,5 @@
 -- Support for linux via acpi
--- Note that this only works if you install acpi 
+-- Requires apci to be installed, for example:
 --   apt install acpi
 
 local J = require("plenary.job")
@@ -23,6 +23,11 @@ Battery 0: Charging, 47%, 01:09:53 until charged
 
 -- Parse the response from the battery info job and update
 -- the battery status
+-- To fix this issue I have removed the average battery calculation
+-- and instead will report the first battery found. Users are finding
+-- that their peripheral batteries are included by acpi which makes
+-- the plugin useless.
+-- https://github.com/justinhj/battery.nvim/issues/12
 local function parse_acpi_battery_info(result, battery_status)
   local count = 0
   local charge_total = 0
@@ -43,6 +48,7 @@ local function parse_acpi_battery_info(result, battery_status)
           ac_power = false
         end
       end
+      break -- one will do
     end
   end
   if count > 0 then
