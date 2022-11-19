@@ -4,7 +4,8 @@
 
 local J = require("plenary.job")
 local L = require("plenary.log")
-
+local BC = require("util.chooser")
+local config = require("battery.config")
 local log = L.new({ plugin = "battery" })
 
 -- TODO would be nice to unit test the parser
@@ -30,15 +31,16 @@ Battery 0: Charging, 47%, 01:09:53 until charged
 -- https://github.com/justinhj/battery.nvim/issues/12
 local function parse_acpi_battery_info(result, battery_status)
   local count = 0
-  local charge_total = 0
   local ac_power = nil
+
+  local percents = {}
 
   for _, line in ipairs(result) do
     local found, _, charge = line:find("(%d+)%%")
     local discharge = line:find("Discharging")
     if found then
       count = count + 1
-      charge_total = charge_total + tonumber(charge)
+      percents = table.insert(percents, tonumber(charge))
       -- only the first battery is used to determine charging or not
       -- since they should all be the same
       if not ac_power then
@@ -48,11 +50,11 @@ local function parse_acpi_battery_info(result, battery_status)
           ac_power = false
         end
       end
-      break -- one will do
     end
   end
   if count > 0 then
-    battery_status.percent_charge_remaining = math.floor(charge_total / count)
+    local chosen_percent = BC.battery_chooser(percents, config.current.multiple_battery_selection)
+    battery_status.percent_charge_remaining = chosen_percent
     battery_status.battery_count = count
     battery_status.ac_power = ac_power
   else

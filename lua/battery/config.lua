@@ -4,7 +4,7 @@ local M = {}
 
 -- Some future options
 -- vertical_icons (if false show horizontal)
--- show_charging_batter_icons
+-- show_charging_battery_icons
 
 local default_config = {
   update_rate_seconds = 30,
@@ -13,6 +13,7 @@ local default_config = {
   show_unplugged_icon = true,
   show_percent = true,
   vertical_icons = true,
+  multiple_battery_selection = 1,
 }
 
 M.current = default_config
