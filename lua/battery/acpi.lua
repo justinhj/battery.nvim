@@ -40,7 +40,7 @@ local function parse_acpi_battery_info(result, battery_status)
     local discharge = line:find("Discharging")
     if found then
       count = count + 1
-      percents = table.insert(percents, tonumber(charge))
+      table.insert(percents, tonumber(charge))
       -- only the first battery is used to determine charging or not
       -- since they should all be the same
       if not ac_power then
