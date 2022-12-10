@@ -15,15 +15,15 @@ local log = L.new({ plugin = "battery" })
 
 -- https://www.nerdfonts.com/cheat-sheet
 local no_battery_icon = "" -- "ﲾ"
-local charging_battery_icons = {
-  { "", 20 },
-  { "", 30 },
-  { "", 40 },
-  { "", 60 },
-  { "", 80 },
-  { "", 90 },
-  { "", 100 },
-}
+-- local charging_battery_icons = {
+--   { "", 20 },
+--   { "", 30 },
+--   { "", 40 },
+--   { "", 60 },
+--   { "", 80 },
+--   { "", 90 },
+--   { "", 100 },
+-- }
 
 local horizontal_battery_icons = {
   { "", 5 },
@@ -104,10 +104,10 @@ local function timer_loop()
   end, config.current.update_rate_seconds * 1000)
 end
 
-local function stop_timer()
-  timer = require("util.timers").get_next()
-  log.debug("Incremented timer to " .. timer .. " to stop the battery update job")
-end
+-- local function stop_timer()
+--   timer = require("util.timers").get_next()
+--   log.debug("Incremented timer to " .. timer .. " to stop the battery update job")
+-- end
 
 local function start_timer()
   timer = require("util.timers").get_next()
@@ -182,7 +182,7 @@ local function get_status_line()
         percent = " " .. battery_percent .. "%%"
       end
 
-      local icon = ""
+      local icon
       if config.current.vertical_icons == true then
         icon = discharging_battery_icon_for_percent(battery_percent)
       else

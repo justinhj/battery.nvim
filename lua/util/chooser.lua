@@ -1,5 +1,14 @@
 -- Handles choosing a battery from an array based on config options
 
+local function average(t)
+  local sum = 0
+  for _, v in pairs(t) do
+    sum = sum + v
+  end
+
+  return sum / #t
+end
+
 -- Given a an array of battery percentages and a selection config
 -- return the one that should be displayed
 -- Valid values for multiple_battery_selection are
@@ -17,7 +26,7 @@ local function battery_chooser(battery_percents, multiple_battery_selection)
   if config == "max" or config == "maximum" then
     return math.max(unpack(battery_percents))
   elseif config == "avg" or config == "average" then
-    return math.floor(math.average(battery_percents))
+    return math.floor(average(battery_percents))
   else
     local index = 1
     if type(config) == "number" and config >= 1 and config <= #battery_percents then
@@ -25,15 +34,6 @@ local function battery_chooser(battery_percents, multiple_battery_selection)
     end
     return battery_percents[index]
   end
-end
-
-function math.average(t)
-  local sum = 0
-  for _, v in pairs(t) do
-    sum = sum + v
-  end
-
-  return sum / #t
 end
 
 -- put(battery_chooser({ 10, 20, 30, 10 }, "maximum"))
