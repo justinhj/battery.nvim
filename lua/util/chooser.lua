@@ -36,10 +36,6 @@ local function battery_chooser(battery_percents, multiple_battery_selection)
   end
 end
 
--- put(battery_chooser({ 10, 20, 30, 10 }, "maximum"))
--- put(battery_chooser({ 10, 20, 30, 10 }, "average"))
--- put(battery_chooser({ 10, 20, 30, 40 }, 1))
-
 return {
   battery_chooser = battery_chooser,
 }
