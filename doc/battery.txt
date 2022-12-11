@@ -1,0 +1,97 @@
+*battery.txt* Battery power indicator for your status line 
+ ___       _   _                  _  ___   _____ __  __ 
+| _ ) __ _| |_| |_ ___ _ _ _  _  | \| \ \ / /_ _|  \/  |     ~
+| _ \/ _` |  _|  _/ -_) '_| || |_| .` |\ V / | || |\/| |     ~
+|___/\__,_|\__|\__\___|_|  \_, (_)_|\_| \_/ |___|_|  |_|     ~
+                           |__/                              ~
+
+Author: Justin Heyes-Jones <https://justinhj.github.io>
+Github: <https://github.com/justinhj/battery.nvim>
+
+==============================================================================
+CONTENTS                                          *battery-contents*
+
+    1. Introduction ......................... |battery-introduction|
+    2. Setup ................................ |battery-setup|
+    3. Commands ............................. |battery-commands|
+    4. Configuration ........................ |battery-configuration|
+
+==============================================================================
+1. INTRODUCTION                               *battery-introduction*
+
+battery.nvim is a cross platform Neovim plugin to provide battery information including percent charge remaining, number of batteries and whether the power cable is connected or not.
+The information is then provided via a lua API also suitable to add to your status line.
+
+Periodically, the plugin will poll for the battery power. How often that happens is configurable. 
+
+==============================================================================
+2. SETUP                                             *battery-setup*
+
+You must call setup to activate the plugin. For a simple configuration with
+all default options you can do the following: >
+
+  local battery = require("battery")
+  battery.setup({})
+<
+
+See |battery-configuration| for all the options. Once setup, you need to add
+it to your status line. Two configurations are presented here. Please open
+a PR if you would like to add a different status line plugin configuration.
+
+Galaxyline config: >
+
+  local gl = require 'galaxyline'
+  local gls = gl.section
+  
+  -- in this example 5th section on the right, change as needed!
+  gls.right[5] = {
+    BatteryNvim = {
+      provider = function()
+        -- note that battery.nvim uses format specifiers such as %% instead of %
+        -- which is needed for other status line plugins like lualine and staline.
+        -- galaxy line expects a formatted string so we must format it here...
+        local status = require("battery").get_status_line()
+        local formatted = string.format(status)
+        return formatted
+      end,
+      separator = '',
+      separator_highlight = { colors.bg, colors.purple },
+      highlight = { colors.grey, colors.purple },
+    },
+  }
+<
+
+Lualine config: >
+
+  local nvimbattery = {
+    function()
+      return require("battery").get_status_line()
+    end,
+    color = { fg = colors.violet, bg = colors.bg },
+  }
+  -- Add it where you want it, something like below.
+  sections = { lualine_a = nvimbattery }
+<
+
+==============================================================================
+3. CONFIGURATION                                     *battery-configuration*
+
+Once installed you need to run the setup function and pass in an optional config. This starts the internal timer so that the battery status is updated periodically. Since the process to get the battery can take a second or two, even though it happens in the background, I don't recommend setting it below about 10 seconds, and several minutes should be fine for most purposes. Running `setup` will always refresh the battery status.
+
+Options: >
+
+  lua << END
+  local battery = require("battery")
+  battery.setup({
+  	update_rate_seconds = 30,           -- Number of seconds between checking battery status
+  	show_status_when_no_battery = true, -- Don't show any icon or text when no battery found (desktop for example)
+  	show_plugged_icon = true,           -- If true show a cable icon alongside the battery icon when plugged in
+  	show_unplugged_icon = true,         -- When true show a diconnected cable icon when not plugged in
+  	show_percent = true,                -- Whether or not to show the percent charge remaining in digits
+      vertical_icons = true,              -- When true icons are vertical, otherwise shows horizontal battery icon
+      multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "min" or "minimum" or a number to pick the nth battery found (currently linux acpi only)
+  })
+<
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
