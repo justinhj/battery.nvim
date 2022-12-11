@@ -9,7 +9,6 @@ local config = require("battery.config")
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
 -- TODO maybe autodetect icons?
--- TODO why is battery percent lower than vim version?
 
 local log = L.new({ plugin = "battery" })
 

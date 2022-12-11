@@ -12,8 +12,3 @@ vim.g.loaded_battery_plugin = 1
 -- create any global command that does not depend on user setup
 -- usually it is better to define most commands/mappings in the setup function
 -- Be careful to not overuse this file!
-local battery_version = require("battery.version")
-
-vim.api.nvim_create_user_command("BatteryVersion", function()
-  vim.notify("battery.nvim version " .. battery_version.version)
-end, {})
