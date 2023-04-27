@@ -1,5 +1,8 @@
 local M = {}
-local health = require("health")
+
+local start = vim.health.start or vim.health.report_start
+local ok = vim.health.ok or vim.health.report_ok
+local error = vim.health.error or vim.health.report_error
 
 -- TODO should check if the plugin is initialized and the setup is valid
 -- TODO should check what method is being used for battery information
@@ -9,12 +12,12 @@ local function check_setup()
 end
 
 M.check = function()
-  health.report_start("battery report")
+  start("battery report")
   -- make sure setup function parameters are ok
   if check_setup() then
-    health.report_ok("Setup function is correct")
+    ok("Setup function is correct")
   else
-    health.report_error("Setup function is incorrect")
+    error("Setup function is incorrect")
   end
   -- do some more checking
   -- ...
