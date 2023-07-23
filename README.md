@@ -17,7 +17,7 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 
 ## Features
 - Gracefully handle no battery (either remove battery info from the status line or just show a desktop icon)
-- Show charge level and whether there is a power cable attached or not via icons (requires [kyazdani42/nvim-web-devicons](https://github.com/kyazdani42/nvim-web-devicons))
+- Show charge level and whether there is a power cable attached or not via icons (requires [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons))
 - Configurable update rate
 - Powershell for Windows battery information
 - pmset Apple Mac OSx battery information
@@ -26,7 +26,7 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 ## Required dependencies
 
 - [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-- [kyazdani42/nvim-web-devicons](https://github.com/kyazdani42/nvim-web-devicons)
+- [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
 
 ## Installation
 Use your package manager to add the dependencies and the plugin. 
@@ -35,14 +35,14 @@ Use your package manager to add the dependencies and the plugin.
 
 ```
 Plug 'nvim-lua/plenary.nvim'
-Plug 'kyazdani42/nvim-web-devicons'
+Plug 'nvim-tree/nvim-web-devicons'
 Plug 'justinhj/battery.nvim'
 ```
 
 ### [Packer](https://github.com/wbthomason/packer.nvim)
 
 ```
-use { 'justinhj/battery.nvim', requires = {{'kyazdani42/nvim-web-devicons'}, {'nvim-lua/plenary.nvim'}}}
+use { 'justinhj/battery.nvim', requires = {{'nvim-tree/nvim-web-devicons'}, {'nvim-lua/plenary.nvim'}}}
 ```
 
 ## Configuration
