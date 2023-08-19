@@ -19,15 +19,16 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 - Gracefully handle no battery (either remove battery info from the status line or just show a desktop icon)
 - Show charge level and whether there is a power cable attached or not via icons (requires [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons))
 - Configurable update rate
-- Powershell for Windows battery information
-- pmset Apple Mac OSx battery information
-- Linux support via acpi
+- Support for Microsoft Windows, Linux and Apple macOS.
 
 ## Required dependencies
-
+### Lua dependencies
 - [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
-- acpi installed on your system and in your PATH
+
+### OS dependencies
+On Windows and macOS, PowerShell and pmset are used to obtain battery status respectively.
+For Linux `acpi` is used, and may not be installed by default on your distribution. See [How to handle acpi events on Linux](https://linuxconfig.org/how-to-handle-acpi-events-on-linux). The package must be correctly installed and in your executable path.
 
 ## Installation
 Use your package manager to add the dependencies and the plugin. 
