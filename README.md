@@ -27,6 +27,7 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 
 - [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
+- acpi installed on your system and in your PATH
 
 ## Installation
 Use your package manager to add the dependencies and the plugin. 
