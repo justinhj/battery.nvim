@@ -13,15 +13,15 @@ local config = require("battery.config")
 local log = L.new({ plugin = "battery" })
 
 -- https://www.nerdfonts.com/cheat-sheet
-local no_battery_icon = "" -- "ﲾ"
+local no_battery_icon = "󰇅" -- "󰟀"
 -- local charging_battery_icons = {
---   { "", 20 },
---   { "", 30 },
---   { "", 40 },
---   { "", 60 },
---   { "", 80 },
---   { "", 90 },
---   { "", 100 },
+--   { "󰂆", 20 },
+--   { "󰂇", 30 },
+--   { "󰂈", 40 },
+--   { "󰂉", 60 },
+--   { "󰂊", 80 },
+--   { "󰂋", 90 },
+--   { "󰂅", 100 },
 -- }
 
 local horizontal_battery_icons = {
@@ -32,19 +32,19 @@ local horizontal_battery_icons = {
   { "", 100 },
 }
 
-local plugged_icon = "ﮣ"
-local unplugged_icon = "ﮤ"
+local plugged_icon = "󰚥"
+local unplugged_icon = "󰚦"
 local discharging_battery_icons = {
-  { "", 10 },
-  { "", 20 },
-  { "", 30 },
-  { "", 40 },
-  { "", 50 },
-  { "", 60 },
-  { "", 70 },
-  { "", 80 },
-  { "", 90 },
-  { "", 100 },
+  { "󰁺", 10 },
+  { "󰁻", 20 },
+  { "󰁼", 30 },
+  { "󰁽", 40 },
+  { "󰁾", 50 },
+  { "󰁿", 60 },
+  { "󰂀", 70 },
+  { "󰂁", 80 },
+  { "󰂂", 90 },
+  { "󰁹", 100 },
 }
 
 -- TODO maybe store the update time here?
@@ -157,7 +157,7 @@ end
 
 local function get_status_line()
   if battery_status.battery_count == nil then
-    return ""
+    return "󰂑"
   else
     if battery_status.battery_count == 0 then
       if config.current.show_status_when_no_battery == true then
