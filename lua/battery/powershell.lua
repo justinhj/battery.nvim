@@ -33,7 +33,8 @@ local status_code_to_ac_power = {
 --   }
 -- ]
 local get_battery_info_powershell_command = {
-  "ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | Select-Object -Property EstimatedChargeRemaining,BatteryStatus)",
+  "ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | \
+  Select-Object -Property EstimatedChargeRemaining,BatteryStatus)",
 }
 
 -- Parse the response json from the battery info job and update
@@ -43,7 +44,6 @@ local function parse_powershell_battery_info(result, battery_status)
   local batteries = vim.json.decode(table.concat(result, ""))
   local count = #batteries -- The count is just the length of batteries
   local charge_total = 0
-  local ac_power = nil
 
   -- Add up total charge
   for _, b in ipairs(batteries) do
@@ -53,7 +53,7 @@ local function parse_powershell_battery_info(result, battery_status)
   -- only the first battery is used to determine charging or not
   -- since they should all be the same
   local status = batteries[1]["BatteryStatus"]
-  ac_power = status_code_to_ac_power[status]
+  local ac_power = status_code_to_ac_power[status]
 
   if count > 0 then
     battery_status.percent_charge_remaining = math.floor(charge_total / count)
