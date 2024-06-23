@@ -2,8 +2,6 @@
 
 local J = require("plenary.job")
 local L = require("plenary.log")
-local BC = require("util.chooser")
-local config = require("battery.config")
 local log = L.new({ plugin = "battery" })
 
 -- Convert lowercase status from `/sys/class/power_supply/BAT?/status`
