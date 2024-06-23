@@ -4,63 +4,56 @@ local L = require("plenary.log")
 
 local log = L.new({ plugin = "battery" })
 
--- Info about battery based on Status field of win32 Battery
+-- Whether the AC power is connected based on Status field of win32 Battery
 -- see https://powershell.one/wmi/root/cimv2/win32_battery#battery-status
--- 3rd field is whether AC is attached or not. nil for "who knows?"
 -- Note that I'm guessing here.
-local win32_battery_status_info = {
-  { "Battery Power", false },
-  { "AC Power", true },
-  { "Fully Charged", true },
-  { "Low", true },
-  { "Critical", false },
-  { "Charging", true },
-  { "Charging and High", true },
-  { "Charging and Low", true },
-  { "Charging and Critical", true },
-  { "Undefined", nil },
-  { "Partially Charged", true },
+local status_code_to_ac_power = {
+  [1] = false, -- Battery Power
+  [2] = true, -- AC Power
+  [3] = true, -- Fully Charged
+  [4] = false, -- Low
+  [5] = false, -- Critical
+  [6] = true, -- Charging
+  [7] = true, -- Charging and High
+  [8] = true, -- Charging and Low
+  [9] = true, -- Charging and Critical
+  [10] = false, -- Undefined, we don't know so let's assume false
+  [11] = true, -- Partially Charged
 }
 
+-- For a laptop with two batteries, the returned json would be in this format:
+-- [
+--   {
+--     "EstimatedChargeRemaining": 93,
+--     "BatteryStatus": 2
+--   },
+--   {
+--     "EstimatedChargeRemaining": 93,
+--     "BatteryStatus": 2
+--   }
+-- ]
 local get_battery_info_powershell_command = {
-  "Get-CimInstance -ClassName Win32_Battery | Select-Object -Property EstimatedChargeRemaining,BatteryStatus",
+  "ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | \
+  Select-Object -Property EstimatedChargeRemaining,BatteryStatus)",
 }
 
--- TODO would be nice to unit test the parser
---[[ Sample output:
-{ "",
-  "EstimatedChargeRemaining BatteryStatus",
-  "------------------------ -------------",
-  "                      92             1",
-  "",
-  "" }
-]]
---
-
--- Parse the response from the batter info job and update
+-- Parse the response json from the battery info job and update
 -- the battery status
 local function parse_powershell_battery_info(result, battery_status)
-  local count = 0
+  -- Decode the json response into a list of batteries
+  local batteries = vim.json.decode(table.concat(result, ""))
+  local count = #batteries -- The count is just the length of batteries
   local charge_total = 0
-  local ac_power = nil
 
-  for _, line in ipairs(result) do
-    local found, _, charge, status = line:find("(%d+)%s+(%d+)")
-    if found then
-      count = count + 1
-      charge_total = charge_total + tonumber(charge)
-      -- only the first battery is used to determine charging or not
-      -- since they should all be the same
-      if not ac_power then
-        local info = win32_battery_status_info[status]
-        if info ~= nil and info[2] ~= nil then
-          ac_power = info[2]
-        else
-          ac_power = false -- we don't know so let's guess no
-        end
-      end
-    end
+  -- Add up total charge
+  for _, b in ipairs(batteries) do
+    charge_total = charge_total + b["EstimatedChargeRemaining"]
   end
+
+  -- only the first battery is used to determine charging or not
+  -- since they should all be the same
+  local status = batteries[1]["BatteryStatus"]
+  local ac_power = status_code_to_ac_power[status]
 
   if count > 0 then
     battery_status.percent_charge_remaining = math.floor(charge_total / count)
