@@ -74,7 +74,7 @@ local function select_job()
   elseif vim.fn.executable("pmset") == 1 then
     log.debug("pmset battery job")
     return pmset.get_battery_info_job
-  elseif vim.fn.isdirectory("/sys/class/power_supply/") then
+  elseif vim.fn.isdirectory("/sys/class/power_supply/") == 1 then
     log.debug("/sys/class/power_supply/ battery job")
     return powersupply.get_battery_info_job
   elseif vim.fn.executable("acpi") == 1 then

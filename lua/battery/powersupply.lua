@@ -2,6 +2,8 @@
 
 local J = require("plenary.job")
 local L = require("plenary.log")
+local BC = require("util.chooser")
+local config = require("battery.config")
 local log = L.new({ plugin = "battery" })
 
 -- Convert lowercase status from `/sys/class/power_supply/BAT?/status`
@@ -10,38 +12,50 @@ local status_to_ac_power = {
     ["full"] = true,
     ["charging"] = true,
     ["discharging"] = false,
-    ["unknown"] = false,
+    ["unknown"] = false, -- We don't know, so assume false
 }
 
 -- Parse the response from the battery info job and update
 -- the battery status
 local function parse_powersupply_battery_info(battery_paths, battery_status)
-  local count = #battery_paths
+  local path_count = #battery_paths
+  local battery_count = 0
 
-  if count > 0 then
-    -- Set battery count
-    battery_status.battery_count = count
-
-    -- Read capacity file of first battery
-    local f = io.open(battery_paths[1] .. "/capacity", "r")
-    if not f then
-      return -- File doesn't exist
+  if path_count > 0 then
+    -- Read capacities of each battery
+    local percents = {}
+    for _, path in ipairs(battery_paths) do
+      local f = io.open(path .. "/capacity", "r")
+      if f then
+        local charge = f:read("n")
+        if charge then
+          battery_count = battery_count + 1
+          table.insert(percents, charge)
+        end
+        f:close()
+      end
     end
-    battery_status.percent_charge_remaining = f:read("n")
-    f:close()
 
     -- Read status file of first battery
-    f = io.open(battery_paths[1] .. "/status", "r")
-    if not f then
-      return -- File doesn't exist
+    local f = io.open(battery_paths[1] .. "/status", "r")
+    local status
+    if f then
+      -- Read line (without newline character, with a default of unknown), to lowercase
+      status = (f:read("l") or "unknown"):lower()
+      f:close()
+    else
+      status = "unknown"
     end
-    local status = f:read("l"):lower() -- Read line (without newline character), to lowercase
     battery_status.ac_power = status_to_ac_power[status]
-    f:close()
+    -- Choose a percent
+    local chosen_percent = BC.battery_chooser(percents, config.current.multiple_battery_selection)
+    battery_status.percent_charge_remaining = chosen_percent
+    -- Set battery count
+    battery_status.battery_count = battery_count
   else
-    battery_status.percent_charge_remaining = 100
-    battery_status.battery_count = count
     battery_status.ac_power = true
+    battery_status.percent_charge_remaining = 100
+    battery_status.battery_count = path_count
   end
 end
 
