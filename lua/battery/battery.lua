@@ -74,7 +74,10 @@ local function select_job()
   elseif vim.fn.executable("pmset") == 1 then
     log.debug("pmset battery job")
     return pmset.get_battery_info_job
-  elseif vim.fn.isdirectory("/sys/class/power_supply/") == 1 then
+  -- Ensure directory exists (isdirectory() == 1) and is readable ($(ls) doesn't contain "ls: cannot")
+  elseif vim.fn.isdirectory("/sys/class/power_supply/") == 1 and
+    -- TODO: Find better way to check for readability (exit code of `ls`?)
+    not vim.fn.system("ls /sys/class/power_supply/"):find("ls: cannot") then
     log.debug("/sys/class/power_supply/ battery job")
     return powersupply.get_battery_info_job
   elseif vim.fn.executable("acpi") == 1 then
