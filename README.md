@@ -122,9 +122,9 @@ If something breaks you should see a standard Vim error telling you what the pro
 
 For more than just info,warn and error logging you can enable debug logs which show a more verbose behaviour of the plugin using the following command to launch nvim.
 
-`PLENARY_DEBUG=true nvim`
+`DEBUG_PLENARY=true nvim`
 
 ## Notes
 Inspired by [lambdalisue/battery.vim](https://github.com/lambdalisue/battery.vim), which in turn uses code from [b4b4r07/dotfiles](https://github.com/b4b4r07/dotfiles/blob/66dddda6803ada50a0ab879e5db784afea72b7be/.tmux/bin/battery#L10).
 
-Copyright (c) 2022 Justin Heyes-Jones
+Copyright (c) 2022-2024 Justin Heyes-Jones
