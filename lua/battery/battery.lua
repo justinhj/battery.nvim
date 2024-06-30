@@ -89,7 +89,7 @@ local function get_method()
   if method == nil then
     _, method = select_job()
   end
-  return battery_status.method
+  return method
 end
 
 local function timer_loop()
