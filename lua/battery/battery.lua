@@ -6,6 +6,7 @@ local pmset = require("battery.pmset")
 local powersupply = require("battery.powersupply")
 local acpi = require("battery.acpi")
 local config = require("battery.config")
+local file = require("util.file")
 
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
@@ -53,6 +54,7 @@ local battery_status = {
   percent_charge_remaining = nil,
   battery_count = nil,
   ac_power = nil,
+  method = nil,
 }
 
 -- Gets the last updated battery information
@@ -70,28 +72,37 @@ local timer = nil
 local function select_job()
   if vim.fn.has("win32") and vim.fn.executable("powershell") == 1 then
     log.debug("windows powershell battery job")
-    return powershell.get_battery_info_job
+    return powershell.get_battery_info_job, 'powershell'
   elseif vim.fn.executable("pmset") == 1 then
     log.debug("pmset battery job")
-    return pmset.get_battery_info_job
-  -- Ensure directory exists (isdirectory() == 1) and is readable ($(ls) doesn't contain "ls: cannot")
-  elseif vim.fn.isdirectory("/sys/class/power_supply/") == 1 and
-    -- TODO: Find better way to check for readability (exit code of `ls`?)
-    not vim.fn.system("ls /sys/class/power_supply/"):find("ls: cannot") then
-    log.debug("/sys/class/power_supply/ battery job")
-    return powersupply.get_battery_info_job
+    return pmset.get_battery_info_job, 'pmset'
+  elseif file.is_readable_directory("/sys/class/power_supply/") then
+    log.debug("power_supply battery job")
+    return powersupply.get_battery_info_job, 'powersupply'
   elseif vim.fn.executable("acpi") == 1 then
     log.debug("acpi battery job")
-    return acpi.get_battery_info_job
+    return acpi.get_battery_info_job, 'acpi'
   else
     log.debug("no battery job")
+    return nil, 'none'
   end
+end
+
+-- This is used for the health check
+local function get_method()
+  local method = battery_status.method
+  if method == nil then
+    _, method = select_job()
+  end
+  return method
 end
 
 local function timer_loop()
   vim.defer_fn(function()
     log.debug(timer .. " is running now")
-    local job_function = select_job()
+    local job_function, method = select_job()
+    battery_status.method = method
+    log.debug("using method " .. method)
 
     if job_function then
       job_function(battery_status):start()
@@ -119,7 +130,9 @@ local function start_timer()
   timer = require("util.timers").get_next()
 
   -- Always call the job immediately before starting the timed loop
-  local job_function = select_job()
+  local job_function, method = select_job()
+  battery_status.method = method
+  log.debug("using method " .. method)
 
   if job_function then
     job_function(battery_status):start()
@@ -203,4 +216,5 @@ end
 M.setup = setup
 M.get_battery_status = get_battery_status
 M.get_status_line = get_status_line
+M.get_method = get_method
 return M
