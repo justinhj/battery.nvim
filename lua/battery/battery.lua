@@ -3,8 +3,10 @@ local M = {}
 local L = require("plenary.log")
 local powershell = require("battery.powershell")
 local pmset = require("battery.pmset")
+local powersupply = require("battery.powersupply")
 local acpi = require("battery.acpi")
 local config = require("battery.config")
+local file = require("util.file")
 
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
@@ -74,6 +76,9 @@ local function select_job()
   elseif vim.fn.executable("pmset") == 1 then
     log.debug("pmset battery job")
     return pmset.get_battery_info_job, 'pmset'
+  elseif file.is_readable_directory("/sys/class/power_supply/") then
+    log.debug("power_supply battery job")
+    return powersupply.get_battery_info_job, 'powersupply'
   elseif vim.fn.executable("acpi") == 1 then
     log.debug("acpi battery job")
     return acpi.get_battery_info_job, 'acpi'
