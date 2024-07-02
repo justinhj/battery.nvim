@@ -1,6 +1,7 @@
 -- Support for linux via acpi
 -- Requires apci to be installed, for example:
 --   apt install acpi
+local M = {}
 
 local J = require('plenary.job')
 local L = require('plenary.log')
@@ -66,7 +67,7 @@ end
 
 -- Create a plenary job to get the battery info
 -- battery_status is a table to store the results in
-local function get_battery_info_job(battery_status)
+function M.get_battery_info_job(battery_status)
   return J:new({
     command = 'acpi',
     on_exit = function(r, return_value)
@@ -83,6 +84,4 @@ local function get_battery_info_job(battery_status)
   })
 end
 
-return {
-  get_battery_info_job = get_battery_info_job,
-}
+return M

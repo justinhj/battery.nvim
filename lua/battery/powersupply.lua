@@ -1,5 +1,7 @@
 -- Get battery info using /sys/class/power_supply/* files. Requires Linux
 
+local M = {}
+
 local J = require('plenary.job')
 local L = require('plenary.log')
 local BC = require('util.chooser')
@@ -59,7 +61,7 @@ local function parse_powersupply_battery_info(battery_paths, battery_status)
   end
 end
 
-local function get_battery_info_job(battery_status)
+function M.get_battery_info_job(battery_status)
   return J:new({
     -- Find symbolic links in /sys/class/power_supply that start with BAT
     -- These are the directories containing information files for each battery
@@ -82,6 +84,4 @@ local function get_battery_info_job(battery_status)
   })
 end
 
-return {
-  get_battery_info_job = get_battery_info_job,
-}
+return M

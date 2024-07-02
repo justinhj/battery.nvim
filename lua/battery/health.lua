@@ -10,7 +10,7 @@ local function check_method()
   return B.get_method() ~= nil
 end
 
-M.check = function()
+function M.check()
   start('Checking method to get battery status')
   if check_method() then
     ok('Using ' .. B.get_method() .. '')

@@ -1,4 +1,5 @@
 -- Handles choosing a battery from an array based on config options
+local M = {}
 
 local function average(t)
   local sum = 0
@@ -17,7 +18,7 @@ end
 --  "avg" or "average" returns the average
 -- invalid or nil config will default to 1, the first found battery
 -- Given an empty list will return 0
-local function battery_chooser(battery_percents, multiple_battery_selection)
+function M.battery_chooser(battery_percents, multiple_battery_selection)
   if type(battery_percents) ~= 'table' or battery_percents[1] == nil then
     return 0
   end
@@ -36,6 +37,4 @@ local function battery_chooser(battery_percents, multiple_battery_selection)
   end
 end
 
-return {
-  battery_chooser = battery_chooser,
-}
+return M

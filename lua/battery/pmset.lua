@@ -1,4 +1,5 @@
 -- For those with pmset (Mac users) to get battery information
+local M = {}
 
 local J = require('plenary.job')
 local L = require('plenary.log')
@@ -62,7 +63,7 @@ end
 
 -- Create a plenary job to get the battery info
 -- battery_status is a table to store the results in
-local function get_battery_info_job(battery_status)
+function M.get_battery_info_job(battery_status)
   return J:new({
     command = 'pmset',
     args = get_battery_info_pmset_args,
@@ -80,6 +81,4 @@ local function get_battery_info_job(battery_status)
   })
 end
 
-return {
-  get_battery_info_job = get_battery_info_job,
-}
+return M
