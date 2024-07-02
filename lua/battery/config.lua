@@ -19,7 +19,7 @@ local default_config = {
 M.current = default_config
 
 M.from_user_opts = function(user_opts)
-  M.current = user_opts and vim.tbl_deep_extend("force", default_config, user_opts) or default_config
+  M.current = user_opts and vim.tbl_deep_extend('force', default_config, user_opts) or default_config
 end
 
 return M

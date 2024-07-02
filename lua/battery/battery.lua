@@ -1,21 +1,21 @@
 local M = {}
 
-local L = require("plenary.log")
-local powershell = require("battery.powershell")
-local pmset = require("battery.pmset")
-local powersupply = require("battery.powersupply")
-local acpi = require("battery.acpi")
-local config = require("battery.config")
-local file = require("util.file")
+local L = require('plenary.log')
+local powershell = require('battery.powershell')
+local pmset = require('battery.pmset')
+local powersupply = require('battery.powersupply')
+local acpi = require('battery.acpi')
+local config = require('battery.config')
+local file = require('util.file')
 
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
 -- TODO maybe autodetect icons?
 
-local log = L.new({ plugin = "battery" })
+local log = L.new({ plugin = 'battery' })
 
 -- https://www.nerdfonts.com/cheat-sheet
-local no_battery_icon = "󰇅" -- "󰟀"
+local no_battery_icon = '󰇅' -- "󰟀"
 -- local charging_battery_icons = {
 --   { "󰂆", 20 },
 --   { "󰂇", 30 },
@@ -27,26 +27,26 @@ local no_battery_icon = "󰇅" -- "󰟀"
 -- }
 
 local horizontal_battery_icons = {
-  { "", 5 },
-  { "", 25 },
-  { "", 50 },
-  { "", 75 },
-  { "", 100 },
+  { '', 5 },
+  { '', 25 },
+  { '', 50 },
+  { '', 75 },
+  { '', 100 },
 }
 
-local plugged_icon = "󰚥"
-local unplugged_icon = "󰚦"
+local plugged_icon = '󰚥'
+local unplugged_icon = '󰚦'
 local discharging_battery_icons = {
-  { "󰁺", 10 },
-  { "󰁻", 20 },
-  { "󰁼", 30 },
-  { "󰁽", 40 },
-  { "󰁾", 50 },
-  { "󰁿", 60 },
-  { "󰂀", 70 },
-  { "󰂁", 80 },
-  { "󰂂", 90 },
-  { "󰁹", 100 },
+  { '󰁺', 10 },
+  { '󰁻', 20 },
+  { '󰁼', 30 },
+  { '󰁽', 40 },
+  { '󰁾', 50 },
+  { '󰁿', 60 },
+  { '󰂀', 70 },
+  { '󰂁', 80 },
+  { '󰂂', 90 },
+  { '󰁹', 100 },
 }
 
 -- TODO maybe store the update time here?
@@ -70,20 +70,20 @@ local timer = nil
 -- Select the battery info job to run based on platform and what programs
 -- are available
 local function select_job()
-  if vim.fn.has("win32") and vim.fn.executable("powershell") == 1 then
-    log.debug("windows powershell battery job")
+  if vim.fn.has('win32') and vim.fn.executable('powershell') == 1 then
+    log.debug('windows powershell battery job')
     return powershell.get_battery_info_job, 'powershell'
-  elseif vim.fn.executable("pmset") == 1 then
-    log.debug("pmset battery job")
+  elseif vim.fn.executable('pmset') == 1 then
+    log.debug('pmset battery job')
     return pmset.get_battery_info_job, 'pmset'
-  elseif file.is_readable_directory("/sys/class/power_supply/") then
-    log.debug("power_supply battery job")
+  elseif file.is_readable_directory('/sys/class/power_supply/') then
+    log.debug('power_supply battery job')
     return powersupply.get_battery_info_job, 'powersupply'
-  elseif vim.fn.executable("acpi") == 1 then
-    log.debug("acpi battery job")
+  elseif vim.fn.executable('acpi') == 1 then
+    log.debug('acpi battery job')
     return acpi.get_battery_info_job, 'acpi'
   else
-    log.debug("no battery job")
+    log.debug('no battery job')
     return nil, 'none'
   end
 end
@@ -99,10 +99,10 @@ end
 
 local function timer_loop()
   vim.defer_fn(function()
-    log.debug(timer .. " is running now")
+    log.debug(timer .. ' is running now')
     local job_function, method = select_job()
     battery_status.method = method
-    log.debug("using method " .. method)
+    log.debug('using method ' .. method)
 
     if job_function then
       job_function(battery_status):start()
@@ -113,8 +113,8 @@ local function timer_loop()
     -- the running job knows that the sequence number no longer matches it will stop running,
     -- regardless of whether the user made a new job or not.
 
-    if require("util.timers").get_current() ~= timer then
-      log.info("Update job stopping due to newer timer.")
+    if require('util.timers').get_current() ~= timer then
+      log.info('Update job stopping due to newer timer.')
     else
       timer_loop()
     end
@@ -127,19 +127,19 @@ end
 -- end
 
 local function start_timer()
-  timer = require("util.timers").get_next()
+  timer = require('util.timers').get_next()
 
   -- Always call the job immediately before starting the timed loop
   local job_function, method = select_job()
   battery_status.method = method
-  log.debug("using method " .. method)
+  log.debug('using method ' .. method)
 
   if job_function then
     job_function(battery_status):start()
   end
 
   timer_loop()
-  log.debug("start timer seq no " .. timer)
+  log.debug('start timer seq no ' .. timer)
 end
 
 local function setup(user_opts)
@@ -148,7 +148,7 @@ local function setup(user_opts)
   local config_update_rate_seconds = tonumber(config.current.update_rate_seconds)
   if config_update_rate_seconds then
     if config_update_rate_seconds < 10 then
-      vim.notify("Update rate less than 10 seconds is not recommended", vim.log.levels.WARN)
+      vim.notify('Update rate less than 10 seconds is not recommended', vim.log.levels.WARN)
     end
   end
 
@@ -163,8 +163,8 @@ local function icon_for_percentage(p, icon_table)
       return icon[1]
     end
   end
-  vim.notify("No icon found for percentage " .. p)
-  return "!"
+  vim.notify('No icon found for percentage ' .. p)
+  return '!'
 end
 
 local function discharging_battery_icon_for_percent(p)
@@ -177,28 +177,28 @@ end
 
 local function get_status_line()
   if battery_status.battery_count == nil then
-    return "󰂑"
+    return '󰂑'
   else
     if battery_status.battery_count == 0 then
       if config.current.show_status_when_no_battery == true then
         return no_battery_icon
       else
-        return ""
+        return ''
       end
     else
       local ac_power = battery_status.ac_power
       local battery_percent = battery_status.percent_charge_remaining
 
-      local plug_icon = ""
+      local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then
         plug_icon = plugged_icon
       elseif not ac_power and config.current.show_unplugged_icon then
         plug_icon = unplugged_icon
       end
 
-      local percent = ""
+      local percent = ''
       if config.current.show_percent == true then
-        percent = " " .. battery_percent .. "%%"
+        percent = ' ' .. battery_percent .. '%%'
       end
 
       local icon

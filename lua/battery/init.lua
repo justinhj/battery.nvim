@@ -1,6 +1,6 @@
 local M = {}
 
-local battery = require("battery.battery")
+local battery = require('battery.battery')
 
 M.setup = battery.setup
 M.get_battery_status = battery.get_battery_status

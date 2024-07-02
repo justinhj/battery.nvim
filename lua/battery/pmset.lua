@@ -1,13 +1,14 @@
 -- For those with pmset (Mac users) to get battery information
+local M = {}
 
-local J = require("plenary.job")
-local L = require("plenary.log")
+local J = require('plenary.job')
+local L = require('plenary.log')
 
-local log = L.new({ plugin = "battery" })
+local log = L.new({ plugin = 'battery' })
 
 local get_battery_info_pmset_args = {
-  "-g",
-  "ps",
+  '-g',
+  'ps',
 }
 
 -- TODO would be nice to unit test the parser
@@ -33,8 +34,8 @@ local function parse_pmset_battery_info(result, battery_status)
   local ac_power = nil
 
   for _, line in ipairs(result) do
-    local found, _, charge = line:find("(%d+)%%")
-    local discharge = line:find("discharging")
+    local found, _, charge = line:find('(%d+)%%')
+    local discharge = line:find('discharging')
     if found then
       count = count + 1
       charge_total = charge_total + tonumber(charge)
@@ -62,9 +63,9 @@ end
 
 -- Create a plenary job to get the battery info
 -- battery_status is a table to store the results in
-local function get_battery_info_job(battery_status)
+function M.get_battery_info_job(battery_status)
   return J:new({
-    command = "pmset",
+    command = 'pmset',
     args = get_battery_info_pmset_args,
     on_exit = function(r, return_value)
       if return_value == 0 then
@@ -73,13 +74,11 @@ local function get_battery_info_job(battery_status)
       else
         log.error(vim.inspect(r:result()))
         vim.schedule(function()
-          vim.notify("battery.nvim: Error getting battery info with pmset", vim.log.levels.ERROR)
+          vim.notify('battery.nvim: Error getting battery info with pmset', vim.log.levels.ERROR)
         end)
       end
     end,
   })
 end
 
-return {
-  get_battery_info_job = get_battery_info_job,
-}
+return M
