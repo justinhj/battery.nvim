@@ -1,8 +1,8 @@
 -- Getting battery info with Powershell. Requires Windows.
-local J = require("plenary.job")
-local L = require("plenary.log")
+local J = require('plenary.job')
+local L = require('plenary.log')
 
-local log = L.new({ plugin = "battery" })
+local log = L.new({ plugin = 'battery' })
 
 -- Whether the AC power is connected based on Status field of win32 Battery
 -- see https://powershell.one/wmi/root/cimv2/win32_battery#battery-status
@@ -33,26 +33,26 @@ local status_code_to_ac_power = {
 --   }
 -- ]
 local get_battery_info_powershell_command = {
-  "ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | \
-  Select-Object -Property EstimatedChargeRemaining,BatteryStatus)",
+  'ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | \
+  Select-Object -Property EstimatedChargeRemaining,BatteryStatus)',
 }
 
 -- Parse the response json from the battery info job and update
 -- the battery status
 local function parse_powershell_battery_info(result, battery_status)
   -- Decode the json response into a list of batteries
-  local batteries = vim.json.decode(table.concat(result, ""))
+  local batteries = vim.json.decode(table.concat(result, ''))
   local count = #batteries -- The count is just the length of batteries
   local charge_total = 0
 
   -- Add up total charge
   for _, b in ipairs(batteries) do
-    charge_total = charge_total + b["EstimatedChargeRemaining"]
+    charge_total = charge_total + b['EstimatedChargeRemaining']
   end
 
   -- only the first battery is used to determine charging or not
   -- since they should all be the same
-  local status = batteries[1]["BatteryStatus"]
+  local status = batteries[1]['BatteryStatus']
   local ac_power = status_code_to_ac_power[status]
 
   if count > 0 then
@@ -70,7 +70,7 @@ end
 -- battery_status is a table to store the results in
 local function get_battery_info_job(battery_status)
   return J:new({
-    command = "powershell",
+    command = 'powershell',
     args = get_battery_info_powershell_command,
     on_exit = function(r, return_value)
       if return_value == 0 then
@@ -78,7 +78,7 @@ local function get_battery_info_job(battery_status)
         log.debug(vim.inspect(battery_status))
       else
         vim.schedule(function()
-          vim.notify("battery.nvim: Error getting battery info with Powershell", vim.log.levels.ERROR)
+          vim.notify('battery.nvim: Error getting battery info with Powershell', vim.log.levels.ERROR)
         end)
       end
     end,

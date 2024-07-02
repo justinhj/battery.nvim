@@ -18,18 +18,18 @@ end
 -- invalid or nil config will default to 1, the first found battery
 -- Given an empty list will return 0
 local function battery_chooser(battery_percents, multiple_battery_selection)
-  if type(battery_percents) ~= "table" or battery_percents[1] == nil then
+  if type(battery_percents) ~= 'table' or battery_percents[1] == nil then
     return 0
   end
   local config = multiple_battery_selection or 1
 
-  if config == "max" or config == "maximum" then
+  if config == 'max' or config == 'maximum' then
     return math.max(unpack(battery_percents))
-  elseif config == "avg" or config == "average" then
+  elseif config == 'avg' or config == 'average' then
     return math.floor(average(battery_percents))
   else
     local index = 1
-    if type(config) == "number" and config >= 1 and config <= #battery_percents then
+    if type(config) == 'number' and config >= 1 and config <= #battery_percents then
       index = config
     end
     return battery_percents[index]

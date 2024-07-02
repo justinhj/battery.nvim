@@ -2,11 +2,11 @@
 -- Requires apci to be installed, for example:
 --   apt install acpi
 
-local J = require("plenary.job")
-local L = require("plenary.log")
-local BC = require("util.chooser")
-local config = require("battery.config")
-local log = L.new({ plugin = "battery" })
+local J = require('plenary.job')
+local L = require('plenary.log')
+local BC = require('util.chooser')
+local config = require('battery.config')
+local log = L.new({ plugin = 'battery' })
 
 -- TODO would be nice to unit test the parser
 --[[ Sample output:
@@ -36,8 +36,8 @@ local function parse_acpi_battery_info(result, battery_status)
   local percents = {}
 
   for _, line in ipairs(result) do
-    local found, _, charge = line:find("(%d+)%%")
-    local discharge = line:find("Discharging")
+    local found, _, charge = line:find('(%d+)%%')
+    local discharge = line:find('Discharging')
     if found then
       count = count + 1
       table.insert(percents, tonumber(charge))
@@ -68,7 +68,7 @@ end
 -- battery_status is a table to store the results in
 local function get_battery_info_job(battery_status)
   return J:new({
-    command = "acpi",
+    command = 'acpi',
     on_exit = function(r, return_value)
       if return_value == 0 then
         parse_acpi_battery_info(r:result(), battery_status)
@@ -76,7 +76,7 @@ local function get_battery_info_job(battery_status)
       else
         log.error(vim.inspect(r:result()))
         vim.schedule(function()
-          vim.notify("battery.nvim: Error getting battery info with acpi", vim.log.levels.ERROR)
+          vim.notify('battery.nvim: Error getting battery info with acpi', vim.log.levels.ERROR)
         end)
       end
     end,
