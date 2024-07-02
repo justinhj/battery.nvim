@@ -1,5 +1,5 @@
-require("matcher_combinators.luassert")
+require('matcher_combinators.luassert')
 
-describe("battery", function()
+describe('battery', function()
   -- TODO test suite
 end)
