@@ -14,7 +14,7 @@ local file = require('util.file')
 
 local log = L.new({ plugin = 'battery' })
 
--- https://www.nerdfonts.com/cheat-sheet
+-- https://www.nerdfonts.com/cheat-sheet?q=battery
 local no_battery_icon = '󰇅' -- "󰟀"
 -- local charging_battery_icons = {
 --   { "󰂆", 20 },
@@ -59,7 +59,7 @@ local battery_status = {
 
 -- Gets the last updated battery information
 -- TODO may add the ability to ask for it to be updated right now
-local function get_battery_status()
+function M.get_battery_status()
   return battery_status
 end
 
@@ -89,7 +89,7 @@ local function select_job()
 end
 
 -- This is used for the health check
-local function get_method()
+function M.get_method()
   local method = battery_status.method
   if method == nil then
     _, method = select_job()
@@ -142,7 +142,7 @@ local function start_timer()
   log.debug('start timer seq no ' .. timer)
 end
 
-local function setup(user_opts)
+function M.setup(user_opts)
   config.from_user_opts(user_opts)
 
   local config_update_rate_seconds = tonumber(config.current.update_rate_seconds)
@@ -175,7 +175,7 @@ local function horizontal_battery_icon_for_percent(p)
   return icon_for_percentage(p, horizontal_battery_icons)
 end
 
-local function get_status_line()
+function M.get_status_line()
   if battery_status.battery_count == nil then
     return '󰂑'
   else
@@ -213,8 +213,4 @@ local function get_status_line()
   end
 end
 
-M.setup = setup
-M.get_battery_status = get_battery_status
-M.get_status_line = get_status_line
-M.get_method = get_method
 return M
