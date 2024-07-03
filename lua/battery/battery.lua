@@ -15,41 +15,6 @@ local icons = require('battery.icons')
 
 local log = L.new({ plugin = 'battery' })
 
--- https://www.nerdfonts.com/cheat-sheet?q=battery
-local _no_battery_icon = '󰇅' -- "󰟀"
--- local charging_battery_icons = {
---   { "󰂆", 20 },
---   { "󰂇", 30 },
---   { "󰂈", 40 },
---   { "󰂉", 60 },
---   { "󰂊", 80 },
---   { "󰂋", 90 },
---   { "󰂅", 100 },
--- }
-
-local _horizontal_battery_icons = {
-  { '', 5 },
-  { '', 25 },
-  { '', 50 },
-  { '', 75 },
-  { '', 100 },
-}
-
-local _plugged_icon = '󰚥'
-local _unplugged_icon = '󰚦'
-local _discharging_battery_icons = {
-  { '󰁺', 10 },
-  { '󰁻', 20 },
-  { '󰁼', 30 },
-  { '󰁽', 40 },
-  { '󰁾', 50 },
-  { '󰁿', 60 },
-  { '󰂀', 70 },
-  { '󰂁', 80 },
-  { '󰂂', 90 },
-  { '󰁹', 100 },
-}
-
 -- TODO maybe store the update time here?
 local battery_status = {
   percent_charge_remaining = nil,
@@ -156,26 +121,6 @@ function M.setup(user_opts)
   start_timer()
 end
 
--- Convert percentage charge to icon given a table of icons
--- and max charge for that icon
-local function icon_for_percentage(p, icon_table)
-  for _, icon in ipairs(icon_table) do
-    if tonumber(p) <= tonumber(icon[2]) then
-      return icon[1]
-    end
-  end
-  vim.notify('No icon found for percentage ' .. p)
-  return '!'
-end
-
-local function discharging_battery_icon_for_percent(p)
-  return icon_for_percentage(p, icons.icon_sets.plain)
-end
-
-local function horizontal_battery_icon_for_percent(p)
-  return icon_for_percentage(p, icons.icon_sets.horizontal)
-end
-
 function M.get_status_line()
   if battery_status.battery_count == nil then
     return icons.specific_icons.unknown
@@ -204,9 +149,9 @@ function M.get_status_line()
 
       local icon
       if config.current.vertical_icons == true then
-        icon = discharging_battery_icon_for_percent(battery_percent)
+        icon = icons.discharging_battery_icon_for_percent(battery_percent)
       else
-        icon = horizontal_battery_icon_for_percent(battery_percent)
+        icon = icons.horizontal_battery_icon_for_percent(battery_percent)
       end
 
       return icon .. plug_icon .. percent

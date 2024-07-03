@@ -1,3 +1,5 @@
+-- https://www.nerdfonts.com/cheat-sheet?q=battery
+
 local M = {}
 
 ---@alias IconSet { [1]: string, [2]: integer }[]
@@ -85,5 +87,29 @@ M.specific_icons = {
   no_battery_classic = '󰟀',
   unknown = '󰂑',
 }
+
+---Convert percentage charge to icon given a table of icons
+---and max charge for that icon
+
+---@param p integer
+---@param icon_table IconSet
+---@return string
+function M.icon_for_percentage(p, icon_table)
+  for _, icon in ipairs(icon_table) do
+    if tonumber(p) <= tonumber(icon[2]) then
+      return icon[1]
+    end
+  end
+  vim.notify('No icon found for percentage ' .. p)
+  return '!'
+end
+
+function M.discharging_battery_icon_for_percent(p)
+  return M.icon_for_percentage(p, M.icon_sets.plain)
+end
+
+function M.horizontal_battery_icon_for_percent(p)
+  return M.icon_for_percentage(p, M.icon_sets.horizontal)
+end
 
 return M
