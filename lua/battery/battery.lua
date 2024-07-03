@@ -123,11 +123,11 @@ end
 
 function M.get_status_line()
   if battery_status.battery_count == nil then
-    return icons.specific_icons.unknown
+    return icons.specific.unknown
   else
     if battery_status.battery_count == 0 then
       if config.current.show_status_when_no_battery == true then
-        return icons.specific_icons.no_battery
+        return icons.specific.no_battery
       else
         return ''
       end
@@ -137,9 +137,9 @@ function M.get_status_line()
 
       local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then
-        plug_icon = icons.specific_icons.plugged
+        plug_icon = icons.specific.plugged
       elseif not ac_power and config.current.show_unplugged_icon then
-        plug_icon = icons.specific_icons.unplugged
+        plug_icon = icons.specific.unplugged
       end
 
       local percent = ''

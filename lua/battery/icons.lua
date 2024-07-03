@@ -5,7 +5,7 @@ local M = {}
 ---@alias IconSet { [1]: string, [2]: integer }[]
 
 ---@type table<string, IconSet>
-M.icon_sets = {
+M.sets = {
   plain = {
     { '󰁺', 10 }, -- nf-md-battery_10.
     { '󰁻', 20 }, -- nf-md-battery_20
@@ -80,7 +80,7 @@ M.icon_sets = {
   },
 }
 
-M.specific_icons = {
+M.specific = {
   plugged = '󰚥',
   unplugged = '󰚦',
   no_battery = '󰇅',
@@ -105,11 +105,11 @@ function M.icon_for_percentage(p, icon_table)
 end
 
 function M.discharging_battery_icon_for_percent(p)
-  return M.icon_for_percentage(p, M.icon_sets.plain)
+  return M.icon_for_percentage(p, M.sets.plain)
 end
 
 function M.horizontal_battery_icon_for_percent(p)
-  return M.icon_for_percentage(p, M.icon_sets.horizontal)
+  return M.icon_for_percentage(p, M.sets.horizontal)
 end
 
 return M
