@@ -7,6 +7,7 @@ local powersupply = require('battery.powersupply')
 local acpi = require('battery.acpi')
 local config = require('battery.config')
 local file = require('util.file')
+local icons = require('battery.icons')
 
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
@@ -15,7 +16,7 @@ local file = require('util.file')
 local log = L.new({ plugin = 'battery' })
 
 -- https://www.nerdfonts.com/cheat-sheet?q=battery
-local no_battery_icon = '󰇅' -- "󰟀"
+local _no_battery_icon = '󰇅' -- "󰟀"
 -- local charging_battery_icons = {
 --   { "󰂆", 20 },
 --   { "󰂇", 30 },
@@ -26,7 +27,7 @@ local no_battery_icon = '󰇅' -- "󰟀"
 --   { "󰂅", 100 },
 -- }
 
-local horizontal_battery_icons = {
+local _horizontal_battery_icons = {
   { '', 5 },
   { '', 25 },
   { '', 50 },
@@ -34,9 +35,9 @@ local horizontal_battery_icons = {
   { '', 100 },
 }
 
-local plugged_icon = '󰚥'
-local unplugged_icon = '󰚦'
-local discharging_battery_icons = {
+local _plugged_icon = '󰚥'
+local _unplugged_icon = '󰚦'
+local _discharging_battery_icons = {
   { '󰁺', 10 },
   { '󰁻', 20 },
   { '󰁼', 30 },
@@ -168,20 +169,20 @@ local function icon_for_percentage(p, icon_table)
 end
 
 local function discharging_battery_icon_for_percent(p)
-  return icon_for_percentage(p, discharging_battery_icons)
+  return icon_for_percentage(p, icons.icon_sets.plain)
 end
 
 local function horizontal_battery_icon_for_percent(p)
-  return icon_for_percentage(p, horizontal_battery_icons)
+  return icon_for_percentage(p, icons.icon_sets.horizontal)
 end
 
 function M.get_status_line()
   if battery_status.battery_count == nil then
-    return '󰂑'
+    return icons.specific_icons.unknown
   else
     if battery_status.battery_count == 0 then
       if config.current.show_status_when_no_battery == true then
-        return no_battery_icon
+        return icons.specific_icons.no_battery
       else
         return ''
       end
@@ -191,9 +192,9 @@ function M.get_status_line()
 
       local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then
-        plug_icon = plugged_icon
+        plug_icon = icons.specific_icons.plugged
       elseif not ac_power and config.current.show_unplugged_icon then
-        plug_icon = unplugged_icon
+        plug_icon = icons.specific_icons.unplugged
       end
 
       local percent = ''
