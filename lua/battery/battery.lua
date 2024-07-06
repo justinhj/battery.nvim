@@ -7,47 +7,13 @@ local powersupply = require('battery.powersupply')
 local acpi = require('battery.acpi')
 local config = require('battery.config')
 local file = require('util.file')
+local icons = require('battery.icons')
 
 -- TODO check for icons and if not available fallback to text
 -- TODO allow user to select no icons
 -- TODO maybe autodetect icons?
 
 local log = L.new({ plugin = 'battery' })
-
--- https://www.nerdfonts.com/cheat-sheet
-local no_battery_icon = '󰇅' -- "󰟀"
--- local charging_battery_icons = {
---   { "󰂆", 20 },
---   { "󰂇", 30 },
---   { "󰂈", 40 },
---   { "󰂉", 60 },
---   { "󰂊", 80 },
---   { "󰂋", 90 },
---   { "󰂅", 100 },
--- }
-
-local horizontal_battery_icons = {
-  { '', 5 },
-  { '', 25 },
-  { '', 50 },
-  { '', 75 },
-  { '', 100 },
-}
-
-local plugged_icon = '󰚥'
-local unplugged_icon = '󰚦'
-local discharging_battery_icons = {
-  { '󰁺', 10 },
-  { '󰁻', 20 },
-  { '󰁼', 30 },
-  { '󰁽', 40 },
-  { '󰁾', 50 },
-  { '󰁿', 60 },
-  { '󰂀', 70 },
-  { '󰂁', 80 },
-  { '󰂂', 90 },
-  { '󰁹', 100 },
-}
 
 -- TODO maybe store the update time here?
 local battery_status = {
@@ -59,7 +25,7 @@ local battery_status = {
 
 -- Gets the last updated battery information
 -- TODO may add the ability to ask for it to be updated right now
-local function get_battery_status()
+function M.get_battery_status()
   return battery_status
 end
 
@@ -89,7 +55,7 @@ local function select_job()
 end
 
 -- This is used for the health check
-local function get_method()
+function M.get_method()
   local method = battery_status.method
   if method == nil then
     _, method = select_job()
@@ -142,7 +108,7 @@ local function start_timer()
   log.debug('start timer seq no ' .. timer)
 end
 
-local function setup(user_opts)
+function M.setup(user_opts)
   config.from_user_opts(user_opts)
 
   local config_update_rate_seconds = tonumber(config.current.update_rate_seconds)
@@ -155,33 +121,13 @@ local function setup(user_opts)
   start_timer()
 end
 
--- Convert percentage charge to icon given a table of icons
--- and max charge for that icon
-local function icon_for_percentage(p, icon_table)
-  for _, icon in ipairs(icon_table) do
-    if tonumber(p) <= tonumber(icon[2]) then
-      return icon[1]
-    end
-  end
-  vim.notify('No icon found for percentage ' .. p)
-  return '!'
-end
-
-local function discharging_battery_icon_for_percent(p)
-  return icon_for_percentage(p, discharging_battery_icons)
-end
-
-local function horizontal_battery_icon_for_percent(p)
-  return icon_for_percentage(p, horizontal_battery_icons)
-end
-
-local function get_status_line()
+function M.get_status_line()
   if battery_status.battery_count == nil then
-    return '󰂑'
+    return icons.specific.unknown
   else
     if battery_status.battery_count == 0 then
       if config.current.show_status_when_no_battery == true then
-        return no_battery_icon
+        return icons.specific.no_battery
       else
         return ''
       end
@@ -191,9 +137,9 @@ local function get_status_line()
 
       local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then
-        plug_icon = plugged_icon
+        plug_icon = icons.specific.plugged
       elseif not ac_power and config.current.show_unplugged_icon then
-        plug_icon = unplugged_icon
+        plug_icon = icons.specific.unplugged
       end
 
       local percent = ''
@@ -203,9 +149,9 @@ local function get_status_line()
 
       local icon
       if config.current.vertical_icons == true then
-        icon = discharging_battery_icon_for_percent(battery_percent)
+        icon = icons.discharging_battery_icon_for_percent(battery_percent)
       else
-        icon = horizontal_battery_icon_for_percent(battery_percent)
+        icon = icons.horizontal_battery_icon_for_percent(battery_percent)
       end
 
       return icon .. plug_icon .. percent
@@ -213,8 +159,4 @@ local function get_status_line()
   end
 end
 
-M.setup = setup
-M.get_battery_status = get_battery_status
-M.get_status_line = get_status_line
-M.get_method = get_method
 return M
