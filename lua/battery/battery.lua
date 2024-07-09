@@ -1,12 +1,8 @@
 local M = {}
 
 local L = require('plenary.log')
-local powershell = require('battery.powershell')
-local pmset = require('battery.pmset')
-local powersupply = require('battery.powersupply')
-local acpi = require('battery.acpi')
 local config = require('battery.config')
-local file = require('util.file')
+local parsers = require('battery.parsers')
 local icons = require('battery.icons')
 
 -- TODO check for icons and if not available fallback to text
@@ -33,25 +29,21 @@ end
 -- can reload the battery module and we can detect the old job is still running.
 local timer = nil
 
--- Select the battery info job to run based on platform and what programs
--- are available
+---Select the battery info job to run based on platform and what programs
+---are available
+---@return (fun(battery_status: table): any)?
+---@return string?
 local function select_job()
-  if vim.fn.has('win32') and vim.fn.executable('powershell') == 1 then
-    log.debug('windows powershell battery job')
-    return powershell.get_battery_info_job, 'powershell'
-  elseif vim.fn.executable('pmset') == 1 then
-    log.debug('pmset battery job')
-    return pmset.get_battery_info_job, 'pmset'
-  elseif file.is_readable_directory('/sys/class/power_supply/') then
-    log.debug('power_supply battery job')
-    return powersupply.get_battery_info_job, 'powersupply'
-  elseif vim.fn.executable('acpi') == 1 then
-    log.debug('acpi battery job')
-    return acpi.get_battery_info_job, 'acpi'
-  else
-    log.debug('no battery job')
-    return nil, 'none'
+  for method, parser_module in pairs(parsers.parsers) do
+    if parser_module.check() then
+      log.debug('using '..method..' method')
+      return parser_module.get_battery_info_job, method
+    end
   end
+
+  -- No suitable parser was found.
+  log.debug('no parser found')
+  return nil, nil
 end
 
 -- This is used for the health check
@@ -68,7 +60,7 @@ local function timer_loop()
     log.debug(timer .. ' is running now')
     local job_function, method = select_job()
     battery_status.method = method
-    log.debug('using method ' .. method)
+    log.debug('using method ' .. (method or 'nil'))
 
     if job_function then
       job_function(battery_status):start()
@@ -98,7 +90,7 @@ local function start_timer()
   -- Always call the job immediately before starting the timed loop
   local job_function, method = select_job()
   battery_status.method = method
-  log.debug('using method ' .. method)
+  log.debug('using method: ' .. (method or 'nil'))
 
   if job_function then
     job_function(battery_status):start()
