@@ -8,7 +8,7 @@ function M.old_is_readable_directory(file)
 end
 
 function M.is_readable_directory(file)
-  return os.execute("test -d "..file.." && test -r "..file) == 0
+  return os.execute('test -d '..file..' && test -r '..file) == 0
 end
 
 return M
