@@ -87,4 +87,10 @@ function M.get_battery_info_job(battery_status)
   })
 end
 
+---Check if this parser would work in the current environment
+---@return boolean
+function M.check()
+  return vim.fn.has('win32') and vim.fn.executable('powershell') == 1
+end
+
 return M

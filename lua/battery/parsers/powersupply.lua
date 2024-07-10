@@ -6,6 +6,7 @@ local J = require('plenary.job')
 local L = require('plenary.log')
 local BC = require('util.chooser')
 local config = require('battery.config')
+local file = require('util.file')
 local log = L.new({ plugin = 'battery' })
 
 -- Convert lowercase status from `/sys/class/power_supply/BAT?/status`
@@ -82,6 +83,12 @@ function M.get_battery_info_job(battery_status)
       end
     end,
   })
+end
+
+---Check if this parser would work in the current environment
+---@return boolean
+function M.check()
+  return file.is_readable_directory('/sys/class/power_supply/')
 end
 
 return M
