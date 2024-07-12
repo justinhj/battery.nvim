@@ -30,6 +30,8 @@ Battery 0: Charging, 47%, 01:09:53 until charged
 -- that their peripheral batteries are included by acpi which makes
 -- the plugin useless.
 -- https://github.com/justinhj/battery.nvim/issues/12
+---@param result string[]
+---@param battery_status BatteryStatus
 local function parse_acpi_battery_info(result, battery_status)
   local count = 0
   local ac_power = nil
@@ -67,6 +69,8 @@ end
 
 -- Create a plenary job to get the battery info
 -- battery_status is a table to store the results in
+---@param battery_status BatteryStatus
+---@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
   return J:new({
     command = 'acpi',

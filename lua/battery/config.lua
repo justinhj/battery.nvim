@@ -2,6 +2,13 @@
 
 local M = {}
 
+-- TODO: DO THIS TYPE
+
+---@class Config
+---@field update_rate_seconds integer
+---@field show_status_when_no_battery boolean
+---@field
+
 -- Some future options
 -- vertical_icons (if false show horizontal)
 -- show_charging_battery_icons

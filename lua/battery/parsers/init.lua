@@ -1,8 +1,10 @@
 local M = {}
 
+---@module 'battery.battery'
+
 ---@class ParserModule
 ---@field check fun(): boolean
----@field get_battery_info_job fun(battery_status: table): any
+---@field get_battery_info_job fun(battery_status: BatteryStatus): any
 
 ---@type table<string, ParserModule>
 M.parsers = {

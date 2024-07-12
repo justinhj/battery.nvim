@@ -39,8 +39,10 @@ local get_battery_info_powershell_command = {
   Select-Object -Property EstimatedChargeRemaining,BatteryStatus)',
 }
 
--- Parse the response json from the battery info job and update
--- the battery status
+---Parse the response json from the battery info job and update
+---the battery status
+---@param result string[]
+---@param battery_status BatteryStatus
 local function parse_powershell_battery_info(result, battery_status)
   -- Decode the json response into a list of batteries
   local batteries = vim.json.decode(table.concat(result, ''))
@@ -68,8 +70,10 @@ local function parse_powershell_battery_info(result, battery_status)
   end
 end
 
--- Create a plenary job to get the battery info
--- battery_status is a table to store the results in
+---Create a plenary job to get the battery info
+---battery_status is a table to store the results in
+---@param battery_status BatteryStatus
+---@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
   return J:new({
     command = 'powershell',

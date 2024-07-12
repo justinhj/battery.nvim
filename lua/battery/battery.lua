@@ -11,12 +11,18 @@ local icons = require('battery.icons')
 
 local log = L.new({ plugin = 'battery' })
 
--- TODO maybe store the update time here?
+-- TODO: maybe store the update time here?
+
+---@class BatteryStatus
+---@field percent_charge_remaining? integer
+---@field battery_count? integer
+---@field ac_power? boolean
+---@field method? string
 local battery_status = {
-  percent_charge_remaining = nil,
   battery_count = nil,
   ac_power = nil,
   method = nil,
+  percent_charge_remaining = nil,
 }
 
 -- Gets the last updated battery information
@@ -27,11 +33,12 @@ end
 
 -- This maps to a timer sequence number in the utils module so the user
 -- can reload the battery module and we can detect the old job is still running.
+---@type integer?
 local timer = nil
 
 ---Select the battery info job to run based on platform and what programs
 ---are available
----@return (fun(battery_status: table): any)?
+---@return (fun(battery_status: BatteryStatus): any)?
 ---@return string?
 local function select_job()
   for method, parser_module in pairs(parsers.parsers) do
@@ -46,7 +53,8 @@ local function select_job()
   return nil, nil
 end
 
--- This is used for the health check
+---This is used for the health check
+---@return string?
 function M.get_method()
   local method = battery_status.method
   if method == nil then
@@ -113,6 +121,7 @@ function M.setup(user_opts)
   start_timer()
 end
 
+---@return string
 function M.get_status_line()
   if battery_status.battery_count == nil then
     return icons.specific.unknown
