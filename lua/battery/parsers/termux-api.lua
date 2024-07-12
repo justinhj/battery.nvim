@@ -8,10 +8,12 @@ local log = L.new({ plugin = 'battery' })
 
 local function parse_termux_battery_info(result, battery_status)
   local status = vim.json.decode(table.concat(result, ''))
+  log.debug(vim.inspect(status))
 
-  battery_status.percent_charge_remaining = status.percent
+  battery_status.percent_charge_remaining = status.percentage
   battery_status.battery_count = 1 -- WARN: This might not always be true
   battery_status.ac_power = status.plugged:find("^PLUGGED_") -- String starts with "PLUGGED_"
+  log.debug(vim.inspect(battery_status))
 end
 
 -- Create a plenary job to get the battery info
