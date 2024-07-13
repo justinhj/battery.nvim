@@ -108,6 +108,7 @@ local function start_timer()
   log.debug('start timer seq no ' .. timer)
 end
 
+---@param user_opts Config
 function M.setup(user_opts)
   config.from_user_opts(user_opts)
 
@@ -135,6 +136,14 @@ function M.get_status_line()
     else
       local ac_power = battery_status.ac_power
       local battery_percent = battery_status.percent_charge_remaining
+      if not battery_percent then
+        log.error(
+'battery_status.percent_charge_remaining is nil, \
+there is probably something wrong with the current \
+parser implementation.'
+        )
+        battery_percent = 100
+      end
 
       local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then

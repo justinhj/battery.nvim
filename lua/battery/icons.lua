@@ -104,10 +104,14 @@ function M.icon_for_percentage(p, icon_table)
   return '!'
 end
 
+---@param p integer
+---@return string
 function M.discharging_battery_icon_for_percent(p)
   return M.icon_for_percentage(p, M.sets.plain)
 end
 
+---@param p integer
+---@return string
 function M.horizontal_battery_icon_for_percent(p)
   return M.icon_for_percentage(p, M.sets.horizontal)
 end
