@@ -25,14 +25,15 @@ local battery_status = {
   percent_charge_remaining = nil,
 }
 
--- Gets the last updated battery information
--- TODO may add the ability to ask for it to be updated right now
+---Gets the last updated battery information
+---TODO may add the ability to ask for it to be updated right now
+---@return BatteryStatus
 function M.get_battery_status()
   return battery_status
 end
 
--- This maps to a timer sequence number in the utils module so the user
--- can reload the battery module and we can detect the old job is still running.
+---This maps to a timer sequence number in the utils module so the user
+---can reload the battery module and we can detect the old job is still running.
 ---@type integer?
 local timer = nil
 

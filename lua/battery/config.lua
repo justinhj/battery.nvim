@@ -9,7 +9,7 @@ local M = {}
 ---@field show_unplugged_icon boolean
 ---@field show_percent boolean
 ---@field vertical_icons boolean
----@field multiple_battery_selection "max" | "maximum" | "min" | "minimum" | integer
+---@field multiple_battery_selection MultipleBatterySelection
 
 -- TODO: Some future options
 -- vertical_icons (if false show horizontal)

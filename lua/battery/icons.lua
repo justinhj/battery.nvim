@@ -90,7 +90,6 @@ M.specific = {
 
 ---Convert percentage charge to icon given a table of icons
 ---and max charge for that icon
-
 ---@param p integer
 ---@param icon_table IconSet
 ---@return string
