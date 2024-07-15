@@ -9,7 +9,7 @@ local BC = require('util.chooser')
 local config = require('battery.config')
 local log = L.new({ plugin = 'battery' })
 
--- TODO would be nice to unit test the parser
+-- TODO: would be nice to unit test the parser
 --[[ Sample output:
 
 Without ac power connected you see...

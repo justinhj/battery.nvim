@@ -5,9 +5,9 @@ local config = require('battery.config')
 local parsers = require('battery.parsers')
 local icons = require('battery.icons')
 
--- TODO check for icons and if not available fallback to text
--- TODO allow user to select no icons
--- TODO maybe autodetect icons?
+-- TODO: check for icons and if not available fallback to text
+-- TODO: allow user to select no icons
+-- TODO: maybe autodetect icons?
 
 local log = L.new({ plugin = 'battery' })
 
@@ -26,7 +26,7 @@ local battery_status = {
 }
 
 ---Gets the last updated battery information
----TODO may add the ability to ask for it to be updated right now
+---TODO: may add the ability to ask for it to be updated right now
 ---@return BatteryStatus
 function M.get_battery_status()
   return battery_status

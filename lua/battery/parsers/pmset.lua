@@ -11,7 +11,7 @@ local get_battery_info_pmset_args = {
   'ps',
 }
 
--- TODO would be nice to unit test the parser
+-- TODO: would be nice to unit test the parser
 --[[ Sample output:
 
 Without ac power connected you see...
