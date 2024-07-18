@@ -32,8 +32,8 @@ function M.get_battery_status()
   return battery_status
 end
 
--- This maps to a timer sequence number in the utils module so the user
--- can reload the battery module and we can detect the old job is still running.
+---This maps to a timer sequence number in the utils module so the user
+---can reload the battery module and we can detect the old job is still running.
 ---@type integer?
 local timer = nil
 
