@@ -1,6 +1,8 @@
 -- Handles choosing a battery from an array based on config options
 local M = {}
 
+---@param t number[]
+---@return number
 local function average(t)
   local sum = 0
   for _, v in pairs(t) do
@@ -10,14 +12,24 @@ local function average(t)
   return sum / #t
 end
 
--- Given a an array of battery percentages and a selection config
--- return the one that should be displayed
--- Valid values for multiple_battery_selection are
---  "max" or "maximum" chooses the largest one
---  1,2,3 .. chooses the nth battery found (defaulting to the last found if there are not enough)
---  "avg" or "average" returns the average
--- invalid or nil config will default to 1, the first found battery
--- Given an empty list will return 0
+---@alias MultipleBatterySelection
+---| 'max'
+---| 'maximum'
+---| 'avg'
+---| 'average'
+---| integer
+
+---Given an array of battery percentages and a selection config
+---return the one that should be displayed
+---Valid values for multiple_battery_selection are
+--- "max" or "maximum" chooses the largest one
+--- 1,2,3 .. chooses the nth battery found (defaulting to the last found if there are not enough)
+--- "avg" or "average" returns the average.
+---Invalid or nil config will default to 1, the first found battery.
+---Given an empty list will return 0
+---@param battery_percents integer[]
+---@param multiple_battery_selection MultipleBatterySelection
+---@return integer
 function M.battery_chooser(battery_percents, multiple_battery_selection)
   if type(battery_percents) ~= 'table' or battery_percents[1] == nil then
     return 0

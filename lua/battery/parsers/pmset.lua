@@ -11,7 +11,7 @@ local get_battery_info_pmset_args = {
   'ps',
 }
 
--- TODO would be nice to unit test the parser
+-- TODO: would be nice to unit test the parser
 --[[ Sample output:
 
 Without ac power connected you see...
@@ -26,8 +26,10 @@ Now drawing from 'AC Power'
 ]]
 --
 
--- Parse the response from the battery info job and update
--- the battery status
+---Parse the response from the battery info job and update
+---the battery status
+---@param result string[]
+---@param battery_status BatteryStatus
 local function parse_pmset_battery_info(result, battery_status)
   local count = 0
   local charge_total = 0
@@ -61,8 +63,10 @@ local function parse_pmset_battery_info(result, battery_status)
   end
 end
 
--- Create a plenary job to get the battery info
--- battery_status is a table to store the results in
+---Create a plenary job to get the battery info
+---battery_status is a table to store the results in
+---@param battery_status BatteryStatus
+---@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
   return J:new({
     command = 'pmset',

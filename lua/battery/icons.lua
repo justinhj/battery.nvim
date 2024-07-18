@@ -90,7 +90,6 @@ M.specific = {
 
 ---Convert percentage charge to icon given a table of icons
 ---and max charge for that icon
-
 ---@param p integer
 ---@param icon_table IconSet
 ---@return string
@@ -104,10 +103,14 @@ function M.icon_for_percentage(p, icon_table)
   return '!'
 end
 
+---@param p integer
+---@return string
 function M.discharging_battery_icon_for_percent(p)
   return M.icon_for_percentage(p, M.sets.plain)
 end
 
+---@param p integer
+---@return string
 function M.horizontal_battery_icon_for_percent(p)
   return M.icon_for_percentage(p, M.sets.horizontal)
 end

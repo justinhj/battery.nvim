@@ -5,33 +5,41 @@ local config = require('battery.config')
 local parsers = require('battery.parsers')
 local icons = require('battery.icons')
 
--- TODO check for icons and if not available fallback to text
--- TODO allow user to select no icons
--- TODO maybe autodetect icons?
+-- TODO: check for icons and if not available fallback to text
+-- TODO: allow user to select no icons
+-- TODO: maybe autodetect icons?
 
 local log = L.new({ plugin = 'battery' })
 
--- TODO maybe store the update time here?
+-- TODO: maybe store the update time here?
+
+---@class BatteryStatus
+---@field percent_charge_remaining? integer
+---@field battery_count? integer
+---@field ac_power? boolean
+---@field method? string
 local battery_status = {
-  percent_charge_remaining = nil,
   battery_count = nil,
   ac_power = nil,
   method = nil,
+  percent_charge_remaining = nil,
 }
 
--- Gets the last updated battery information
--- TODO may add the ability to ask for it to be updated right now
+---Gets the last updated battery information
+---TODO: may add the ability to ask for it to be updated right now
+---@return BatteryStatus
 function M.get_battery_status()
   return battery_status
 end
 
--- This maps to a timer sequence number in the utils module so the user
--- can reload the battery module and we can detect the old job is still running.
+---This maps to a timer sequence number in the utils module so the user
+---can reload the battery module and we can detect the old job is still running.
+---@type integer?
 local timer = nil
 
 ---Select the battery info job to run based on platform and what programs
 ---are available
----@return (fun(battery_status: table): any)?
+---@return (fun(battery_status: BatteryStatus): any)?
 ---@return string?
 local function select_job()
   for method, parser_module in pairs(parsers.parsers) do
@@ -46,7 +54,8 @@ local function select_job()
   return nil, nil
 end
 
--- This is used for the health check
+---This is used for the health check
+---@return string?
 function M.get_method()
   local method = battery_status.method
   if method == nil then
@@ -100,6 +109,7 @@ local function start_timer()
   log.debug('start timer seq no ' .. timer)
 end
 
+---@param user_opts Config
 function M.setup(user_opts)
   config.from_user_opts(user_opts)
 
@@ -113,6 +123,7 @@ function M.setup(user_opts)
   start_timer()
 end
 
+---@return string
 function M.get_status_line()
   if battery_status.battery_count == nil then
     return icons.specific.unknown
@@ -126,6 +137,14 @@ function M.get_status_line()
     else
       local ac_power = battery_status.ac_power
       local battery_percent = battery_status.percent_charge_remaining
+      if not battery_percent then
+        log.error(
+'battery_status.percent_charge_remaining is nil, \
+there is probably something wrong with the current \
+parser implementation.'
+        )
+        battery_percent = 100
+      end
 
       local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then

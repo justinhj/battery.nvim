@@ -18,8 +18,10 @@ local status_to_ac_power = {
   ['unknown'] = false, -- We don't know, so assume false
 }
 
--- Parse the response from the battery info job and update
--- the battery status
+---Parse the response from the battery info job and update
+---the battery status
+---@param battery_paths string[]
+---@param battery_status BatteryStatus
 local function parse_powersupply_battery_info(battery_paths, battery_status)
   local path_count = #battery_paths
   local battery_count = 0
@@ -62,6 +64,8 @@ local function parse_powersupply_battery_info(battery_paths, battery_status)
   end
 end
 
+---@param battery_status BatteryStatus
+---@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
   return J:new({
     -- Find symbolic links in /sys/class/power_supply that start with BAT

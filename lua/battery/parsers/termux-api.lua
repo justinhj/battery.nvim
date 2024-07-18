@@ -6,6 +6,8 @@ local L = require('plenary.log')
 
 local log = L.new({ plugin = 'battery' })
 
+---@param result string[]
+---@param battery_status BatteryStatus
 local function parse_termux_battery_info(result, battery_status)
   local status = vim.json.decode(table.concat(result, ''))
   log.debug(vim.inspect(status))
@@ -16,8 +18,10 @@ local function parse_termux_battery_info(result, battery_status)
   log.debug(vim.inspect(battery_status))
 end
 
--- Create a plenary job to get the battery info
--- battery_status is a table to store the results in
+---Create a plenary job to get the battery info
+---battery_status is a table to store the results in
+---@param battery_status BatteryStatus
+---@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
   return J:new({
     command = 'termux-battery-status',
