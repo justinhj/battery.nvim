@@ -9,7 +9,7 @@ local BC = require('util.chooser')
 local config = require('battery.config')
 local log = L.new({ plugin = 'battery' })
 
--- TODO would be nice to unit test the parser
+-- TODO: would be nice to unit test the parser
 --[[ Sample output:
 
 Without ac power connected you see...
@@ -23,13 +23,13 @@ Battery 0: Charging, 47%, 01:09:53 until charged
 ]]
 --
 
--- Parse the response from the battery info job and update
--- the battery status
--- To fix this issue I have removed the average battery calculation
--- and instead will report the first battery found. Users are finding
--- that their peripheral batteries are included by acpi which makes
--- the plugin useless.
--- https://github.com/justinhj/battery.nvim/issues/12
+---Parse the response from the battery info job and update
+---the battery status
+---To fix this issue I have removed the average battery calculation
+---and instead will report the first battery found. Users are finding
+---that their peripheral batteries are included by acpi which makes
+---the plugin useless.
+---https://github.com/justinhj/battery.nvim/issues/12
 ---@param result string[]
 ---@param battery_status BatteryStatus
 local function parse_acpi_battery_info(result, battery_status)
@@ -67,8 +67,8 @@ local function parse_acpi_battery_info(result, battery_status)
   end
 end
 
--- Create a plenary job to get the battery info
--- battery_status is a table to store the results in
+---Create a plenary job to get the battery info
+---battery_status is a table to store the results in
 ---@param battery_status BatteryStatus
 ---@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)

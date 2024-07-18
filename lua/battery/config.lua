@@ -2,17 +2,20 @@
 
 local M = {}
 
--- TODO: DO THIS TYPE
-
 ---@class Config
 ---@field update_rate_seconds integer
 ---@field show_status_when_no_battery boolean
----@field
+---@field show_plugged_icon boolean
+---@field show_unplugged_icon boolean
+---@field show_percent boolean
+---@field vertical_icons boolean
+---@field multiple_battery_selection MultipleBatterySelection
 
--- Some future options
+-- TODO: Some future options
 -- vertical_icons (if false show horizontal)
 -- show_charging_battery_icons
 
+---@type Config
 local default_config = {
   update_rate_seconds = 30,
   show_status_when_no_battery = true,
@@ -25,7 +28,8 @@ local default_config = {
 
 M.current = default_config
 
-M.from_user_opts = function(user_opts)
+---@param user_opts Config
+function M.from_user_opts(user_opts)
   M.current = user_opts and vim.tbl_deep_extend('force', default_config, user_opts) or default_config
 end
 

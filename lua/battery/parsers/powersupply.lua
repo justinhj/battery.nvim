@@ -18,8 +18,8 @@ local status_to_ac_power = {
   ['unknown'] = false, -- We don't know, so assume false
 }
 
--- Parse the response from the battery info job and update
--- the battery status
+---Parse the response from the battery info job and update
+---the battery status
 ---@param battery_paths string[]
 ---@param battery_status BatteryStatus
 local function parse_powersupply_battery_info(battery_paths, battery_status)

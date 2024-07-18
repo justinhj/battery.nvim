@@ -6,6 +6,7 @@ local error = vim.health.error or vim.health.report_error
 
 local B = require('battery.battery')
 
+---@return boolean
 local function check_method()
   return B.get_method() ~= nil
 end

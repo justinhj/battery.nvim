@@ -1,5 +1,5 @@
 require('matcher_combinators.luassert')
 
 describe('battery', function()
-  -- TODO test suite
+  -- TODO: test suite
 end)

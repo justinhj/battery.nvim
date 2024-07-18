@@ -5,9 +5,9 @@ local config = require('battery.config')
 local parsers = require('battery.parsers')
 local icons = require('battery.icons')
 
--- TODO check for icons and if not available fallback to text
--- TODO allow user to select no icons
--- TODO maybe autodetect icons?
+-- TODO: check for icons and if not available fallback to text
+-- TODO: allow user to select no icons
+-- TODO: maybe autodetect icons?
 
 local log = L.new({ plugin = 'battery' })
 
@@ -25,8 +25,9 @@ local battery_status = {
   percent_charge_remaining = nil,
 }
 
--- Gets the last updated battery information
--- TODO may add the ability to ask for it to be updated right now
+---Gets the last updated battery information
+---TODO: may add the ability to ask for it to be updated right now
+---@return BatteryStatus
 function M.get_battery_status()
   return battery_status
 end
@@ -108,6 +109,7 @@ local function start_timer()
   log.debug('start timer seq no ' .. timer)
 end
 
+---@param user_opts Config
 function M.setup(user_opts)
   config.from_user_opts(user_opts)
 
@@ -135,6 +137,14 @@ function M.get_status_line()
     else
       local ac_power = battery_status.ac_power
       local battery_percent = battery_status.percent_charge_remaining
+      if not battery_percent then
+        log.error(
+'battery_status.percent_charge_remaining is nil, \
+there is probably something wrong with the current \
+parser implementation.'
+        )
+        battery_percent = 100
+      end
 
       local plug_icon = ''
       if ac_power and config.current.show_plugged_icon then
