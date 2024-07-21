@@ -56,7 +56,10 @@ local function parse_powershell_battery_info(result, battery_status)
 
   -- only the first battery is used to determine charging or not
   -- since they should all be the same
-  local status = batteries[1]['BatteryStatus']
+  local status = (
+    batteries[1] and batteries[1]['BatteryStatus'] -- Get BatteryStatus if present
+    or 2 -- Default to 2 ("AC Power")
+  )
   local ac_power = status_code_to_ac_power[status]
 
   if count > 0 then
