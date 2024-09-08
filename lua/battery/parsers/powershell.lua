@@ -97,7 +97,10 @@ end
 ---Check if this parser would work in the current environment
 ---@return boolean
 function M.check()
-  return vim.fn.has('win32') and vim.fn.executable('powershell') == 1
+  return (
+    vim.fn.has('win32') == 1
+    and vim.fn.executable('powershell') == 1
+  )
 end
 
 return M
