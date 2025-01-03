@@ -15,16 +15,17 @@ local get_battery_info_powershell_command = {
 ---@param result string[]
 ---@param battery_status BatteryStatus
 local function parse_wsl_battery_info(result, battery_status)
-  local battery_info = result[1]:match('%d+')
-  if battery_info then
-    battery_status.percent_charge_remaining = tonumber(battery_info)
-    battery_status.ac_power = false
-    battery_status.battery_count = 1
-  else
-    battery_status.percent_charge_remaining = 100
-    battery_status.ac_power = true
-    battery_status.battery_count = 0
-  end
+    log.debug("WSL Battery Info Result: ", vim.inspect(result))
+    local battery_info = result[1] and result[1]:match('%d+')
+    if battery_info then
+      battery_status.percent_charge_remaining = tonumber(battery_info)
+      battery_status.ac_power = false
+      battery_status.battery_count = 1
+    else
+      battery_status.percent_charge_remaining = 100
+      battery_status.ac_power = true
+      battery_status.battery_count = 0
+    end
 end
 
 ---@param battery_status BatteryStatus
