@@ -13,6 +13,7 @@ M.parsers = {
   powersupply = require('battery.parsers.powersupply'),
   acpi = require('battery.parsers.acpi'),
   termux_api = require('battery.parsers.termux-api'),
+  wsl = require('battery.parsers.wsl')
 }
 
 return M
