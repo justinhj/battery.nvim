@@ -47,8 +47,7 @@ end
 function M.get_battery_info_job(battery_status)
   return J:new({
     command = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
-    args = get_battery_info_powershell_command,
-    on_exit = function(j, return_value)
+    args = { '-Command', table.concat(get_battery_info_powershell_command, ' ') },    on_exit = function(j, return_value)
       if return_value == 0 then
         parse_wsl_battery_info(j:result(), battery_status)
         log.debug(vim.inspect(battery_status))
