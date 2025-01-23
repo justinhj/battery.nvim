@@ -45,8 +45,16 @@ local get_battery_info_powershell_command = {
 ---@param battery_status BatteryStatus
 local function parse_powershell_battery_info(result, battery_status)
   -- Decode the json response into a list of batteries
-  local batteries = vim.json.decode(table.concat(result, ''))
-  local count = #batteries -- The count is just the length of batteries
+
+  -- Attempt to decode the JSON safely
+  local success, batteries = pcall(vim.json.decode, table.concat(result, ''))
+
+  -- If decoding fails, batteries will be nil, and we can handle it gracefully
+  if not success or batteries == nil then
+    batteries = {} -- Default to an empty table
+  end
+
+  local count = #batteries
   local charge_total = 0
 
   -- Add up total charge
@@ -97,10 +105,7 @@ end
 ---Check if this parser would work in the current environment
 ---@return boolean
 function M.check()
-  return (
-    vim.fn.has('win32') == 1
-    and vim.fn.executable('powershell') == 1
-  )
+  return (vim.fn.has('win32') == 1 and vim.fn.executable('powershell') == 1)
 end
 
 return M
