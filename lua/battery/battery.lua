@@ -153,6 +153,13 @@ parser implementation.'
         plug_icon = icons.specific.unplugged
       end
 
+			-- extra space to separate horizontal battery from plug symbol
+			if not config.vertical_icons then
+				if plug_icon ~= '' then
+					plug_icon = ' ' + plug_icon
+				end
+			end
+
       local percent = ''
       if config.current.show_percent == true then
         percent = ' ' .. battery_percent .. '%%'
