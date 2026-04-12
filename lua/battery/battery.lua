@@ -72,7 +72,7 @@ local function timer_loop()
     log.debug('using method ' .. (method or 'nil'))
 
     if job_function then
-      job_function(battery_status):start()
+      job_function(battery_status)
     end
 
     -- When the user reloads the battery module the job can just keep running. In order to stop it
@@ -102,7 +102,7 @@ local function start_timer()
   log.debug('using method: ' .. (method or 'nil'))
 
   if job_function then
-    job_function(battery_status):start()
+    job_function(battery_status)
   end
 
   timer_loop()

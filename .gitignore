@@ -1,3 +1,4 @@
 test/vendor/*/
 doc/tags
 .vs/
+GEMINI.md

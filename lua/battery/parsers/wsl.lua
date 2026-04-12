@@ -2,21 +2,19 @@
 
 local M = {}
 
-local J = require('plenary.job')
 local L = require('plenary.log')
 local log = L.new({ plugin = 'battery' })
 
-local get_battery_info_powershell_command = {
-  'Get-WmiObject -Class Win32_Battery | Select-Object -ExpandProperty EstimatedChargeRemaining',
-}
+local get_battery_info_powershell_command = 'Get-WmiObject -Class Win32_Battery | Select-Object -ExpandProperty EstimatedChargeRemaining'
 
 ---Parse the response from the battery info job and update
 ---the battery status
----@param result string[]
+---@param result string | string[]
 ---@param battery_status BatteryStatus
 local function parse_wsl_battery_info(result, battery_status)
     log.debug("WSL Battery Info Result: ", vim.inspect(result))
-    local battery_info = result[1] and result[1]:match('%d+')
+    local line = type(result) == 'table' and result[1] or result
+    local battery_info = line and line:match('%d+')
     if battery_info then
       battery_status.percent_charge_remaining = tonumber(battery_info)
       battery_status.ac_power = false
@@ -29,20 +27,19 @@ local function parse_wsl_battery_info(result, battery_status)
 end
 
 ---@param battery_status BatteryStatus
----@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
-  return J:new({
-    command = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
-    args = { '-Command', table.concat(get_battery_info_powershell_command, ' ') },
-    on_exit = function(j, return_value)
-      if return_value == 0 then
-        parse_wsl_battery_info(j:result(), battery_status)
-        log.debug(vim.inspect(battery_status))
-      else
-        log.error(vim.inspect(j:result()))
-      end
-    end,
-  })
+  return vim.system({
+    '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
+    '-Command',
+    get_battery_info_powershell_command,
+  }, { text = true }, function(obj)
+    if obj.code == 0 then
+      parse_wsl_battery_info(obj.stdout, battery_status)
+      log.debug(vim.inspect(battery_status))
+    else
+      log.error(obj.stderr)
+    end
+  end)
 end
 
 ---Check if this parser would work in the current environment

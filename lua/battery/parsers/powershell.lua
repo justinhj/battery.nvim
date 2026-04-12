@@ -1,7 +1,6 @@
 -- Getting battery info with Powershell. Requires Windows.
 local M = {}
 
-local J = require('plenary.job')
 local L = require('plenary.log')
 
 local log = L.new({ plugin = 'battery' })
@@ -34,20 +33,19 @@ local status_code_to_ac_power = {
 --     "BatteryStatus": 2
 --   }
 -- ]
-local get_battery_info_powershell_command = {
-  'ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | \
-  Select-Object -Property EstimatedChargeRemaining,BatteryStatus)',
-}
+local get_battery_info_powershell_command = 'ConvertTo-Json @(Get-CimInstance -ClassName Win32_Battery | Select-Object -Property EstimatedChargeRemaining,BatteryStatus)'
 
 ---Parse the response json from the battery info job and update
 ---the battery status
----@param result string[]
+---@param result string | string[]
 ---@param battery_status BatteryStatus
 local function parse_powershell_battery_info(result, battery_status)
   -- Decode the json response into a list of batteries
 
+  local json_str = type(result) == 'table' and table.concat(result, '') or result
+
   -- Attempt to decode the JSON safely
-  local success, batteries = pcall(vim.json.decode, table.concat(result, ''))
+  local success, batteries = pcall(vim.json.decode, json_str)
 
   -- If decoding fails, batteries will be nil, and we can handle it gracefully
   if not success or batteries == nil then
@@ -81,25 +79,20 @@ local function parse_powershell_battery_info(result, battery_status)
   end
 end
 
----Create a plenary job to get the battery info
+---Create a job to get the battery info
 ---battery_status is a table to store the results in
 ---@param battery_status BatteryStatus
----@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
-  return J:new({
-    command = 'powershell',
-    args = get_battery_info_powershell_command,
-    on_exit = function(r, return_value)
-      if return_value == 0 then
-        parse_powershell_battery_info(r:result(), battery_status)
-        log.debug(vim.inspect(battery_status))
-      else
-        vim.schedule(function()
-          vim.notify('battery.nvim: Error getting battery info with Powershell', vim.log.levels.ERROR)
-        end)
-      end
-    end,
-  })
+  return vim.system({ 'powershell', get_battery_info_powershell_command }, { text = true }, function(obj)
+    if obj.code == 0 then
+      parse_powershell_battery_info(obj.stdout, battery_status)
+      log.debug(vim.inspect(battery_status))
+    else
+      vim.schedule(function()
+        vim.notify('battery.nvim: Error getting battery info with Powershell', vim.log.levels.ERROR)
+      end)
+    end
+  end)
 end
 
 ---Check if this parser would work in the current environment

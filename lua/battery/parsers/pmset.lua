@@ -1,7 +1,6 @@
 -- For those with pmset (Mac users) to get battery information
 local M = {}
 
-local J = require('plenary.job')
 local L = require('plenary.log')
 
 local log = L.new({ plugin = 'battery' })
@@ -28,14 +27,16 @@ Now drawing from 'AC Power'
 
 ---Parse the response from the battery info job and update
 ---the battery status
----@param result string[]
+---@param result string | string[]
 ---@param battery_status BatteryStatus
 local function parse_pmset_battery_info(result, battery_status)
   local count = 0
   local charge_total = 0
   local ac_power = nil
 
-  for _, line in ipairs(result) do
+  local lines = type(result) == 'string' and vim.split(result, '\n') or result
+
+  for _, line in ipairs(lines) do
     local found, _, charge = line:find('(%d+)%%')
     local discharge = line:find('discharging')
     if found then
@@ -63,26 +64,25 @@ local function parse_pmset_battery_info(result, battery_status)
   end
 end
 
----Create a plenary job to get the battery info
+---Create a job to get the battery info
 ---battery_status is a table to store the results in
 ---@param battery_status BatteryStatus
----@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
-  return J:new({
-    command = 'pmset',
-    args = get_battery_info_pmset_args,
-    on_exit = function(r, return_value)
-      if return_value == 0 then
-        parse_pmset_battery_info(r:result(), battery_status)
-        log.debug(vim.inspect(battery_status))
-      else
-        log.error(vim.inspect(r:result()))
-        vim.schedule(function()
-          vim.notify('battery.nvim: Error getting battery info with pmset', vim.log.levels.ERROR)
-        end)
-      end
-    end,
-  })
+  local cmd = { 'pmset' }
+  for _, arg in ipairs(get_battery_info_pmset_args) do
+    table.insert(cmd, arg)
+  end
+  return vim.system(cmd, { text = true }, function(obj)
+    if obj.code == 0 then
+      parse_pmset_battery_info(obj.stdout, battery_status)
+      log.debug(vim.inspect(battery_status))
+    else
+      log.error(obj.stderr)
+      vim.schedule(function()
+        vim.notify('battery.nvim: Error getting battery info with pmset', vim.log.levels.ERROR)
+      end)
+    end
+  end)
 end
 
 ---Check if this parser would work in the current environment

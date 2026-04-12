@@ -3,7 +3,6 @@
 --   apt install acpi
 local M = {}
 
-local J = require('plenary.job')
 local L = require('plenary.log')
 local BC = require('util.chooser')
 local config = require('battery.config')
@@ -30,7 +29,7 @@ Battery 0: Charging, 47%, 01:09:53 until charged
 ---that their peripheral batteries are included by acpi which makes
 ---the plugin useless.
 ---https://github.com/justinhj/battery.nvim/issues/12
----@param result string[]
+---@param result string | string[]
 ---@param battery_status BatteryStatus
 local function parse_acpi_battery_info(result, battery_status)
   local count = 0
@@ -38,7 +37,9 @@ local function parse_acpi_battery_info(result, battery_status)
 
   local percents = {}
 
-  for _, line in ipairs(result) do
+  local lines = type(result) == 'string' and vim.split(result, '\n') or result
+
+  for _, line in ipairs(lines) do
     local found, _, charge = line:find('(%d+)%%')
     local discharge = line:find('Discharging')
     if found then
@@ -67,25 +68,21 @@ local function parse_acpi_battery_info(result, battery_status)
   end
 end
 
----Create a plenary job to get the battery info
+---Create a job to get the battery info
 ---battery_status is a table to store the results in
 ---@param battery_status BatteryStatus
----@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
-  return J:new({
-    command = 'acpi',
-    on_exit = function(r, return_value)
-      if return_value == 0 then
-        parse_acpi_battery_info(r:result(), battery_status)
-        log.debug(vim.inspect(battery_status))
-      else
-        log.error(vim.inspect(r:result()))
-        vim.schedule(function()
-          vim.notify('battery.nvim: Error getting battery info with acpi', vim.log.levels.ERROR)
-        end)
-      end
-    end,
-  })
+  return vim.system({ 'acpi' }, { text = true }, function(obj)
+    if obj.code == 0 then
+      parse_acpi_battery_info(obj.stdout, battery_status)
+      log.debug(vim.inspect(battery_status))
+    else
+      log.error(obj.stderr)
+      vim.schedule(function()
+        vim.notify('battery.nvim: Error getting battery info with acpi', vim.log.levels.ERROR)
+      end)
+    end
+  end)
 end
 
 ---Check if this parser would work in the current environment

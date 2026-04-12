@@ -1,15 +1,15 @@
 -- Getting battery info with termux-battery-status. Requires Termux and Termux:API.
 local M = {}
 
-local J = require('plenary.job')
 local L = require('plenary.log')
 
 local log = L.new({ plugin = 'battery' })
 
----@param result string[]
+---@param result string | string[]
 ---@param battery_status BatteryStatus
 local function parse_termux_battery_info(result, battery_status)
-  local status = vim.json.decode(table.concat(result, ''))
+  local json_str = type(result) == 'table' and table.concat(result, '') or result
+  local status = vim.json.decode(json_str)
   log.debug(vim.inspect(status))
 
   battery_status.percent_charge_remaining = status.percentage
@@ -18,24 +18,20 @@ local function parse_termux_battery_info(result, battery_status)
   log.debug(vim.inspect(battery_status))
 end
 
----Create a plenary job to get the battery info
+---Create a job to get the battery info
 ---battery_status is a table to store the results in
 ---@param battery_status BatteryStatus
----@return unknown # Plenary job
 function M.get_battery_info_job(battery_status)
-  return J:new({
-    command = 'termux-battery-status',
-    on_exit = function(r, return_value)
-      if return_value == 0 then
-        parse_termux_battery_info(r:result(), battery_status)
-        log.debug(vim.inspect(battery_status))
-      else
-        vim.schedule(function()
-          vim.notify('battery.nvim: Error getting battery info with termux-battery-status', vim.log.levels.ERROR)
-        end)
-      end
-    end,
-  })
+  return vim.system({ 'termux-battery-status' }, { text = true }, function(obj)
+    if obj.code == 0 then
+      parse_termux_battery_info(obj.stdout, battery_status)
+      log.debug(vim.inspect(battery_status))
+    else
+      vim.schedule(function()
+        vim.notify('battery.nvim: Error getting battery info with termux-battery-status', vim.log.levels.ERROR)
+      end)
+    end
+  end)
 end
 
 ---Check if this parser would work in the current environment
