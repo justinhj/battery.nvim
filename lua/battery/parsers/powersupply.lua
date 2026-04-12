@@ -2,11 +2,10 @@
 
 local M = {}
 
-local L = require('plenary.log')
+local log = require('util.log')
 local BC = require('util.chooser')
 local config = require('battery.config')
 local file = require('util.file')
-local log = L.new({ plugin = 'battery' })
 
 -- Convert lowercase status from `/sys/class/power_supply/BAT?/status`
 -- to whether AC power is connected
@@ -76,7 +75,7 @@ function M.get_battery_info_job(battery_status)
   }, { text = true }, function(obj)
     if obj.code == 0 then
       parse_powersupply_battery_info(obj.stdout, battery_status)
-      log.debug(vim.inspect(battery_status))
+      log.debug(battery_status)
     else
       log.error(obj.stderr)
     end

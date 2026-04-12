@@ -3,10 +3,9 @@
 --   apt install acpi
 local M = {}
 
-local L = require('plenary.log')
+local log = require('util.log')
 local BC = require('util.chooser')
 local config = require('battery.config')
-local log = L.new({ plugin = 'battery' })
 
 -- TODO: would be nice to unit test the parser
 --[[ Sample output:
@@ -75,7 +74,7 @@ function M.get_battery_info_job(battery_status)
   return vim.system({ 'acpi' }, { text = true }, function(obj)
     if obj.code == 0 then
       parse_acpi_battery_info(obj.stdout, battery_status)
-      log.debug(vim.inspect(battery_status))
+      log.debug(battery_status)
     else
       log.error(obj.stderr)
       vim.schedule(function()

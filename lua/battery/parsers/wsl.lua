@@ -2,8 +2,7 @@
 
 local M = {}
 
-local L = require('plenary.log')
-local log = L.new({ plugin = 'battery' })
+local log = require('util.log')
 
 local get_battery_info_powershell_command = 'Get-WmiObject -Class Win32_Battery | Select-Object -ExpandProperty EstimatedChargeRemaining'
 
@@ -12,7 +11,7 @@ local get_battery_info_powershell_command = 'Get-WmiObject -Class Win32_Battery 
 ---@param result string | string[]
 ---@param battery_status BatteryStatus
 local function parse_wsl_battery_info(result, battery_status)
-    log.debug("WSL Battery Info Result: ", vim.inspect(result))
+    log.debug("WSL Battery Info Result: ", result)
     local line = type(result) == 'table' and result[1] or result
     local battery_info = line and line:match('%d+')
     if battery_info then
@@ -35,7 +34,7 @@ function M.get_battery_info_job(battery_status)
   }, { text = true }, function(obj)
     if obj.code == 0 then
       parse_wsl_battery_info(obj.stdout, battery_status)
-      log.debug(vim.inspect(battery_status))
+      log.debug(battery_status)
     else
       log.error(obj.stderr)
     end

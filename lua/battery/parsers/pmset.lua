@@ -1,9 +1,7 @@
 -- For those with pmset (Mac users) to get battery information
 local M = {}
 
-local L = require('plenary.log')
-
-local log = L.new({ plugin = 'battery' })
+local log = require('util.log')
 
 local get_battery_info_pmset_args = {
   '-g',
@@ -75,7 +73,7 @@ function M.get_battery_info_job(battery_status)
   return vim.system(cmd, { text = true }, function(obj)
     if obj.code == 0 then
       parse_pmset_battery_info(obj.stdout, battery_status)
-      log.debug(vim.inspect(battery_status))
+      log.debug(battery_status)
     else
       log.error(obj.stderr)
       vim.schedule(function()

@@ -10,6 +10,9 @@ check:
 ./vendor/matcher_combinators.lua:
 	git clone https://github.com/m00qek/matcher_combinators.lua.git --depth 1 ./vendor/matcher_combinators.lua
 
+
+# TODO remove plenary in test suite
+
 ./vendor/plenary.nvim:
 	git clone https://github.com/nvim-lua/plenary.nvim.git --depth 1 ./vendor/plenary.nvim
 

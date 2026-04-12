@@ -13,7 +13,7 @@ The information is then provided as a programmatic API you can call from Lua and
 I was working on a small 12" laptop and there's not a lot of screen real estate, so I tended to maximize my terminal window when editing code. Unfortunately, that means I can't see the battery status, and don't know how long I've got without switching windows. I decided to fix that by adding it to the the statusline and this plugin was born.
 
 ## How?
-The plugin is written in Lua and depends heavily on the Plenary library for its excellent support for processes (Jobs). When you start the plugin (by calling `require"battery".setup({})`) it runs a job in the background every 5 minutes (or however often you want, see config) and updates the battery status. Then you can call `require"battery".get_status_line()` in your statusline plugin to show the battery percentage and an appropriate icon.
+The plugin is written in Lua. When you start the plugin (by calling `require"battery".setup({})`) it runs a job (Using an async call `vim.system`) in the background every 5 minutes (or however often you want, see config) and updates the battery status. Then you can call `require"battery".get_status_line()` in your statusline plugin to show the battery percentage and an appropriate icon.
 
 ## Features
 - Gracefully handle no battery (either remove battery info from the status line or just show a desktop icon)
@@ -23,7 +23,6 @@ The plugin is written in Lua and depends heavily on the Plenary library for its 
 
 ## Required dependencies
 ### Lua dependencies
-- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
 
 **NOTICE** Please check the nvim-web-devicons repo for information on breaking changes to Nerd Fonts. This dependency is used to show the icons in this plugin and requires a compatible font. Thank you to Github user @david-0609 for bringing this to my attention and updating the icons used in this application. Should you encounter missing icons please upgrade the font you are using so it is using 2.3 or 3.0.
@@ -40,7 +39,6 @@ Use your package manager to add the dependencies and the plugin.
 ### [Plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'justinhj/battery.nvim'
 ```
@@ -59,7 +57,6 @@ return {
 
     dependencies = {
       "nvim-tree/nvim-web-devicons",
-      "nvim-lua/plenary.nvim",
     },
 
     opts = {
@@ -92,7 +89,7 @@ return {
 ### [Packer](https://github.com/wbthomason/packer.nvim)
 
 ```lua
-use { 'justinhj/battery.nvim', requires = {{'nvim-tree/nvim-web-devicons'}, {'nvim-lua/plenary.nvim'}}}
+use { 'justinhj/battery.nvim', requires = {{'nvim-tree/nvim-web-devicons'}}}
 ```
 
 ## Configuration
@@ -166,9 +163,9 @@ If something breaks you should see a standard Vim error telling you what the pro
 
 For more than just info,warn and error logging you can enable debug logs which show a more verbose behaviour of the plugin using the following command to launch nvim.
 
-`DEBUG_PLENARY=true nvim`
+`BATTERY_DEBUG=true nvim`
 
 ## Notes
 Inspired by [lambdalisue/battery.vim](https://github.com/lambdalisue/battery.vim), which in turn uses code from [b4b4r07/dotfiles](https://github.com/b4b4r07/dotfiles/blob/66dddda6803ada50a0ab879e5db784afea72b7be/.tmux/bin/battery#L10).
 
-Copyright (c) 2022-2024 Justin Heyes-Jones
+Copyright (c) 2022-2026 Justin Heyes-Jones

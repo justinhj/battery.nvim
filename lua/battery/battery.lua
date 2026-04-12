@@ -1,6 +1,6 @@
 local M = {}
 
-local L = require('plenary.log')
+local log = require('util.log')
 local config = require('battery.config')
 local parsers = require('battery.parsers')
 local icons = require('battery.icons')
@@ -8,10 +8,6 @@ local icons = require('battery.icons')
 -- TODO: check for icons and if not available fallback to text
 -- TODO: allow user to select no icons
 -- TODO: maybe autodetect icons?
-
-local log = L.new({ plugin = 'battery' })
-
--- TODO: maybe store the update time here?
 
 ---@class BatteryStatus
 ---@field percent_charge_remaining? integer

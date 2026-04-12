@@ -1,9 +1,7 @@
 -- Getting battery info with Powershell. Requires Windows.
 local M = {}
 
-local L = require('plenary.log')
-
-local log = L.new({ plugin = 'battery' })
+local log = require('util.log')
 
 -- Whether the AC power is connected based on Status field of win32 Battery
 -- see https://powershell.one/wmi/root/cimv2/win32_battery#battery-status
@@ -86,7 +84,7 @@ function M.get_battery_info_job(battery_status)
   return vim.system({ 'powershell', get_battery_info_powershell_command }, { text = true }, function(obj)
     if obj.code == 0 then
       parse_powershell_battery_info(obj.stdout, battery_status)
-      log.debug(vim.inspect(battery_status))
+      log.debug(battery_status)
     else
       vim.schedule(function()
         vim.notify('battery.nvim: Error getting battery info with Powershell', vim.log.levels.ERROR)
