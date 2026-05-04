@@ -26,7 +26,7 @@ M.info = function(msg) log(msg, "INFO") end
 if is_debug then
   M.debug = function(msg) log(msg, "DEBUG") end
 else
-  M.debug = function(msg) end
+  M.debug = function(_msg) end
 end
 
 M.error = function(msg) log(msg, "ERROR") end
