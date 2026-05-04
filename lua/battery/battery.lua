@@ -105,8 +105,29 @@ local function start_timer()
   log.debug('start timer seq no ' .. timer)
 end
 
+---Check if the current Neovim version supports the required features
+---@return boolean
+function M.check_version()
+  if not vim.system then
+    local v = vim.version()
+    local version_str = string.format('%d.%d.%d', v.major, v.minor, v.patch)
+    log.error(
+      string.format(
+        'Required function vim.system not available (Neovim v%s). Please upgrade Neovim or use version v0.9.1 or earlier.',
+        version_str
+      )
+    )
+    return false
+  end
+  return true
+end
+
 ---@param user_opts Config
 function M.setup(user_opts)
+  if not M.check_version() then
+    return
+  end
+
   config.from_user_opts(user_opts)
 
   local config_update_rate_seconds = tonumber(config.current.update_rate_seconds)
