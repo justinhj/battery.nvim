@@ -19,19 +19,25 @@ The plugin is written in Lua. When you start the plugin (by calling `require"bat
 - Gracefully handle no battery (either remove battery info from the status line or just show a desktop icon)
 - Show charge level and whether there is a power cable attached or not via icons (requires [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons))
 - Configurable update rate
-- Support for Microsoft Windows, Linux and Apple macOS.
+- Support for Microsoft Windows, Linux, Apple macOS, **Termux (Android)** and **WSL**.
 
 ## Required dependencies
+### Neovim version
+- **Neovim v0.10.0 or later** is required (uses `vim.system`).
+- The plugin will gracefully fail to load on older versions of Neovim with a descriptive error message.
+
 ### Lua dependencies
 - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
 
 **NOTICE** Please check the nvim-web-devicons repo for information on breaking changes to Nerd Fonts. This dependency is used to show the icons in this plugin and requires a compatible font. Thank you to Github user @david-0609 for bringing this to my attention and updating the icons used in this application. Should you encounter missing icons please upgrade the font you are using so it is using 2.3 or 3.0.
 
-_If you do not wish to upgrade your font you can pin to a previous version of the plugin using tag v0.8.0 instead of the main branch._
+_If you do not wish to upgrade your font or Neovim version, you can pin to a previous version of the plugin using tag v0.8.0 instead of the main branch._
 
 ### OS dependencies
 On Windows and macOS, PowerShell and pmset are used to obtain battery status respectively.
 For Linux `acpi` is used, and may not be installed by default on your distribution. See [How to handle acpi events on Linux](https://linuxconfig.org/how-to-handle-acpi-events-on-linux). The package must be correctly installed and in your executable path.
+On Termux, the `termux-api` package and Android app are required.
+On WSL, `powercfg.exe` (from the host Windows) is used.
 
 ## Installation
 Use your package manager to add the dependencies and the plugin. 
