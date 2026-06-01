@@ -6,7 +6,7 @@ Neovim plugin to collect and view information on battery power in your status li
 </p>
 
 ## What?
-This is a cross platform Neovim plugin to provide battery information including percent charge remaining, number of batteries and whether the power cable is connected or not.
+This is a cross-platform Neovim plugin to provide battery information including percent charge remaining, number of batteries and whether the power cable is connected or not.
 The information is then provided as a programmatic API you can call from Lua and also suitable to add to your status line.
 
 ## Why?
@@ -110,10 +110,10 @@ battery.setup({
     update_rate_seconds = 30,           -- Number of seconds between checking battery status
     show_status_when_no_battery = true, -- Don't show any icon or text when no battery found (desktop for example)
     show_plugged_icon = true,           -- If true show a cable icon alongside the battery icon when plugged in
-    show_unplugged_icon = true,         -- When true show a diconnected cable icon when not plugged in
+    show_unplugged_icon = true,         -- When true show a disconnected cable icon when not plugged in
     show_percent = true,                -- Whether or not to show the percent charge remaining in digits
     vertical_icons = true,              -- When true icons are vertical, otherwise shows horizontal battery icon
-    multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "min" or "minimum" or a number to pick the nth battery found (currently linux acpi only)
+    multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "avg" or "average" or a number to pick the nth battery found (currently linux acpi only)
 })
 END
 ```
