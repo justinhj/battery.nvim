@@ -16,8 +16,8 @@ I was working on a small 12" laptop and there's not a lot of screen real estate,
 The plugin is written in Lua. When you start the plugin (by calling `require"battery".setup({})`) it runs a job (Using an async call `vim.system`) in the background every 5 minutes (or however often you want, see config) and updates the battery status. Then you can call `require"battery".get_status_line()` in your statusline plugin to show the battery percentage and an appropriate icon.
 
 ## Features
-- Gracefully handle no battery (either remove battery info from the status line or just show a desktop icon)
-- Show charge level and whether there is a power cable attached or not via icons (requires [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons))
+- Handles no battery (either remove battery info from the status line or just show a desktop icon)
+- Show charge level and whether there is a power cable attached or not
 - Configurable update rate
 - Support for Microsoft Windows, Linux, Apple macOS, **Termux (Android)** and **WSL**.
 
@@ -25,13 +25,6 @@ The plugin is written in Lua. When you start the plugin (by calling `require"bat
 ### Neovim version
 - **Neovim v0.10.0 or later** is required (uses `vim.system`).
 - The plugin will gracefully fail to load on older versions of Neovim with a descriptive error message.
-
-### Lua dependencies
-- [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
-
-**NOTICE** Please check the nvim-web-devicons repo for information on breaking changes to Nerd Fonts. This dependency is used to show the icons in this plugin and requires a compatible font. Thank you to Github user @david-0609 for bringing this to my attention and updating the icons used in this application. Should you encounter missing icons please upgrade the font you are using so it is using 2.3 or 3.0.
-
-_If you do not wish to upgrade your font or Neovim version, you can pin to a previous version of the plugin using tag v0.8.0 instead of the main branch._
 
 ### OS dependencies
 On Windows and macOS, PowerShell and pmset are used to obtain battery status respectively.
@@ -42,10 +35,35 @@ On WSL, `powercfg.exe` (from the host Windows) is used.
 ## Installation
 Use your package manager to add the dependencies and the plugin. 
 
+### vim.pack - Neovim built-in
+
+```lua
+vim.pack.add({
+  {
+    src = 'https://github.com/justinhj/battery.nvim',
+    version = 'main',
+  },
+})
+require('configs/battery')
+```
+
+Example contents of `configs/battery`:
+
+```lua
+require('battery').setup({
+  update_rate_seconds = 60,
+  show_status_when_no_battery = false,
+  show_plugged_icon = true,
+  show_unplugged_icon = false,
+  show_percent = true,
+  vertical_icons = true,
+  multiple_battery_selection = 1,
+})
+```
+
 ### [Plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-Plug 'nvim-tree/nvim-web-devicons'
 Plug 'justinhj/battery.nvim'
 ```
 
@@ -60,10 +78,6 @@ return {
 
   {
     "justinhj/battery.nvim",
-
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-    },
 
     opts = {
       update_rate_seconds = 60,
@@ -95,7 +109,7 @@ return {
 ### [Packer](https://github.com/wbthomason/packer.nvim)
 
 ```lua
-use { 'justinhj/battery.nvim', requires = {{'nvim-tree/nvim-web-devicons'}}}
+use { 'justinhj/battery.nvim' }
 ```
 
 ## Configuration
