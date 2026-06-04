@@ -139,7 +139,6 @@ sections = { lualine_a = nvimbattery }
 ```
 
 ## Adding to [galaxyline](https://github.com/glepnir/galaxyline.nvim)
-
 Add this to your galaxy line config in the section you want:
 
 ```lua
@@ -167,9 +166,56 @@ gls.right[5] = {
 ## Diagnostics and debugging
 If something breaks you should see a standard Vim error telling you what the problem is. There is some info logging you will find wherever your Neovim cache is `:h stdpath`.
 
-For more than just info,warn and error logging you can enable debug logs which show a more verbose behaviour of the plugin using the following command to launch nvim.
+For more than just info, warn and error logging you can enable debug logs which show a more verbose behaviour of the plugin using the following command to launch nvim.
 
 `BATTERY_DEBUG=true nvim`
+
+## Development
+To develop the plugin, you may find it useful to use the dev-shell script to
+run in a consistent, minimal Neovim instance.
+
+For Linux/MacOS (bash):
+```sh
+. ./scripts/dev-shell.sh
+```
+
+For Windows (PowerShell):
+```ps1
+. ./scripts/DevShell.ps1
+```
+
+> [!NOTE]
+>
+> You may need to enable [Developer Mode](https://learn.microsoft.com/en-us/windows/advanced-settings/developer-mode)
+> if you are on Windows, since `DevShell.ps1` creates a symlink.
+
+Now, you can run Neovim using the `dev_init.lua` init script:
+```sh
+nvim -u ./scripts/dev_init.lua
+```
+
+This loads battery.nvim as a plugin, runs the `setup()` function and assigns
+some convenience functions for interactive testing.
+
+The following functions are available:
+```lua
+BatteryStatus = require('battery').get_battery_status
+BatteryStatusLine = require('battery').get_status_line
+```
+
+And they can be used like so:
+```vim
+" Get current battery status (table)
+= BatteryStatus()
+```
+```vim
+" Get formatted current battery status (string)
+= BatteryStatusLine()
+```
+
+> [!NOTE]
+>
+> Read through [CONTRIBUTING.md](./CONTRIBUTING.md) before creating a PR.
 
 ## Notes
 Inspired by [lambdalisue/battery.vim](https://github.com/lambdalisue/battery.vim), which in turn uses code from [b4b4r07/dotfiles](https://github.com/b4b4r07/dotfiles/blob/66dddda6803ada50a0ab879e5db784afea72b7be/.tmux/bin/battery#L10).
