@@ -19,7 +19,7 @@ The plugin is written in Lua. When you start the plugin (by calling `require"bat
 - Handles no battery (either remove battery info from the status line or just show a desktop icon)
 - Show charge level and whether there is a power cable attached or not
 - Configurable update rate
-- Support for Microsoft Windows, Linux, Apple macOS, **Termux (Android)** and **WSL**.
+- Support for Microsoft Windows, Linux, Apple macOS, Termux (Android) and WSL.
 
 ## Required dependencies
 ### Neovim version
@@ -30,7 +30,6 @@ The plugin is written in Lua. When you start the plugin (by calling `require"bat
 On Windows and macOS, PowerShell and pmset are used to obtain battery status respectively.
 For Linux `acpi` is used, and may not be installed by default on your distribution. See [How to handle acpi events on Linux](https://linuxconfig.org/how-to-handle-acpi-events-on-linux). The package must be correctly installed and in your executable path.
 On Termux, the `termux-api` package and Android app are required.
-On WSL, `powercfg.exe` (from the host Windows) is used.
 
 ## Installation
 Use your package manager to add the dependencies and the plugin. 
