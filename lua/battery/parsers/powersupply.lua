@@ -85,7 +85,7 @@ end
 ---Check if this parser would work in the current environment
 ---@return boolean
 function M.check()
-  return file.is_readable_directory('/sys/class/power_supply/') and vim.fn.has('wsl') == 0
+  return file.is_readable_directory('/sys/class/power_supply/')
 end
 
 return M
