@@ -11,7 +11,6 @@ M.parsers = {
   powershell = require('battery.parsers.powershell'),
   pmset = require('battery.parsers.pmset'),
   powersupply = require('battery.parsers.powersupply'),
-  acpi = require('battery.parsers.acpi'),
   termux_api = require('battery.parsers.termux-api'),
 }
 

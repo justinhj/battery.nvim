@@ -28,7 +28,7 @@ The plugin is written in Lua. When you start the plugin (by calling `require"bat
 
 ### OS dependencies
 On Windows and macOS, PowerShell and pmset are used to obtain battery status respectively.
-For Linux `acpi` is used, and may not be installed by default on your distribution. See [How to handle acpi events on Linux](https://linuxconfig.org/how-to-handle-acpi-events-on-linux). The package must be correctly installed and in your executable path.
+On Linux, `/sys/class/power_supply` is used directly with no external package dependencies required.
 On Termux, the `termux-api` package and Android app are required.
 
 ## Installation
@@ -126,7 +126,7 @@ battery.setup({
     show_unplugged_icon = true,         -- When true show a disconnected cable icon when not plugged in
     show_percent = true,                -- Whether or not to show the percent charge remaining in digits
     vertical_icons = true,              -- When true icons are vertical, otherwise shows horizontal battery icon
-    multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "avg" or "average" or a number to pick the nth battery found (currently linux acpi only)
+    multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "avg" or "average" or a number to pick the nth battery found (Linux only)
 })
 END
 ```
