@@ -21,6 +21,57 @@ local battery_status = {
   percent_charge_remaining = nil,
 }
 
+---Tracks the most severe battery level already notified about, so each
+---threshold crossing notifies exactly once until the level resets
+---(charged back above the thresholds, plugged into AC, or no battery).
+---@type 'none'|'low'|'critical'
+local notified_level = 'none'
+
+---Evaluate the latest battery status against the configured low/critical
+---thresholds and notify once per threshold crossing.
+---Called once per timer tick. The parser jobs fill `battery_status`
+---asynchronously via vim.system, so this reads the most recently completed
+---poll and can lag a real crossing by at most one poll interval.
+local function check_low_battery_notification()
+  local cfg = config.current
+  if not cfg.notify_on_low_battery then
+    return
+  end
+
+  local percent = battery_status.percent_charge_remaining
+
+  -- Nothing to warn about: no data yet, no battery, or on AC power.
+  -- Reset so notifications re-arm for the next discharge.
+  if battery_status.battery_count == nil or battery_status.battery_count == 0 or battery_status.ac_power or percent == nil then
+    notified_level = 'none'
+    return
+  end
+
+  local level = 'none'
+  if percent <= cfg.critical_battery_threshold then
+    level = 'critical'
+  elseif percent <= cfg.low_battery_threshold then
+    level = 'low'
+  end
+
+  local rank = { none = 0, low = 1, critical = 2 }
+  if rank[level] > rank[notified_level] then
+    -- Escalation: notify exactly once for this crossing.
+    notified_level = level
+    local notify = cfg.notify_function or vim.notify
+    -- floor: some parsers (termux-api) can report fractional percents
+    local pct = math.floor(percent)
+    if level == 'critical' then
+      notify(string.format('battery.nvim: critical battery level (%d%% remaining)', pct), vim.log.levels.ERROR)
+    else
+      notify(string.format('battery.nvim: low battery (%d%% remaining)', pct), vim.log.levels.WARN)
+    end
+  elseif rank[level] < rank[notified_level] then
+    -- De-escalation (charged back above a threshold): re-arm.
+    notified_level = level
+  end
+end
+
 ---Gets the last updated battery information
 ---TODO: may add the ability to ask for it to be updated right now
 ---@return battery.Status
@@ -63,6 +114,11 @@ end
 local function timer_loop()
   vim.defer_fn(function()
     log.debug(timer .. ' is running now')
+
+    -- Evaluate notifications against the most recently completed poll
+    -- before launching the next job.
+    check_low_battery_notification()
+
     local job_function, method = select_job()
     battery_status.method = method
     log.debug('using method ' .. (method or 'nil'))
@@ -134,6 +190,18 @@ function M.setup(user_opts)
   if config_update_rate_seconds then
     if config_update_rate_seconds < 10 then
       vim.notify('Update rate less than 10 seconds is not recommended', vim.log.levels.WARN)
+    end
+  end
+
+  if config.current.notify_on_low_battery then
+    local low = config.current.low_battery_threshold
+    local critical = config.current.critical_battery_threshold
+    if type(low) ~= 'number' or type(critical) ~= 'number' or critical >= low then
+      vim.notify(
+        'battery.nvim: critical_battery_threshold must be a number less than low_battery_threshold; notifications disabled',
+        vim.log.levels.WARN
+      )
+      config.current.notify_on_low_battery = false
     end
   end
 

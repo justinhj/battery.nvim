@@ -10,6 +10,10 @@ local M = {}
 ---@field show_percent boolean
 ---@field vertical_icons boolean
 ---@field multiple_battery_selection battery.MultipleBatterySelection
+---@field notify_on_low_battery boolean
+---@field low_battery_threshold integer
+---@field critical_battery_threshold integer
+---@field notify_function? fun(msg: string, level: integer)
 
 -- TODO: Some future options
 -- vertical_icons (if false show horizontal)
@@ -24,6 +28,10 @@ local default_config = {
   show_percent = true,
   vertical_icons = true,
   multiple_battery_selection = 1,
+  notify_on_low_battery = false,
+  low_battery_threshold = 20,
+  critical_battery_threshold = 10,
+  notify_function = nil,
 }
 
 M.current = default_config

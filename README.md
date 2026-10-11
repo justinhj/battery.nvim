@@ -57,6 +57,9 @@ require('battery').setup({
   show_percent = true,
   vertical_icons = true,
   multiple_battery_selection = 1,
+  notify_on_low_battery = true,
+  low_battery_threshold = 20,
+  critical_battery_threshold = 10,
 })
 ```
 
@@ -85,6 +88,9 @@ return {
       show_unplugged_icon = true,
       show_percent = true,
       vertical_icons = false,
+      notify_on_low_battery = true,
+      low_battery_threshold = 20,
+      critical_battery_threshold = 10,
     },
   },
   {
@@ -126,6 +132,11 @@ battery.setup({
     show_unplugged_icon = true,         -- When true show a disconnected cable icon when not plugged in
     show_percent = true,                -- Whether or not to show the percent charge remaining in digits
     vertical_icons = true,              -- When true icons are vertical, otherwise shows horizontal battery icon
+    multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "avg" or "average" or a number to pick the nth battery found (currently linux acpi only)
+    notify_on_low_battery = false,      -- When true, warn via vim.notify when the battery drops below the thresholds below (only while discharging)
+    low_battery_threshold = 20,         -- Percent at which a low battery warning is shown
+    critical_battery_threshold = 10,    -- Percent at which a critical battery warning is shown (must be less than low_battery_threshold)
+    notify_function = nil,              -- Optional custom notify function(msg, level); defaults to vim.notify (e.g. route through nvim-notify)
     multiple_battery_selection = 1,     -- Which battery to choose when multiple found. "max" or "maximum", "avg" or "average" or a number to pick the nth battery found (Linux only)
 })
 END
