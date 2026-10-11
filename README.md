@@ -57,6 +57,9 @@ require('battery').setup({
   show_percent = true,
   vertical_icons = true,
   multiple_battery_selection = 1,
+  notify_on_low_battery = true,
+  low_battery_threshold = 20,
+  critical_battery_threshold = 10,
 })
 ```
 
@@ -85,6 +88,9 @@ return {
       show_unplugged_icon = true,
       show_percent = true,
       vertical_icons = false,
+      notify_on_low_battery = true,
+      low_battery_threshold = 20,
+      critical_battery_threshold = 10,
     },
   },
   {
