@@ -21,10 +21,11 @@ function M.check()
     for method, parser_module in pairs(parsers.parsers) do
       local success, reason = parser_module.check()
       if not success and reason then
-        table.insert(advice, #advice + 1, ('%s: %s'):format(method, reason))
+        table.insert(advice, ('%s: %s'):format(method, reason))
       end
     end
-    error('No method found.', advice)
+    table.sort(advice)
+    error('No method found.', #advice > 0 and advice or nil)
   end
 end
 

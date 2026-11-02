@@ -37,16 +37,8 @@ end
 ---@return boolean supported
 ---@return string? reason
 function M.check()
-  if vim.fn.has('nvim-0.12') == 1 then
-    -- In Neovim >= 0.12, use the built-in `has(...)` check
-    if vim.fn.has('termux') == 0 then
-      return false
-    end
-  else
-    -- In Neovim < 0.12, check for the presence of an environment variable
-    if not vim.env.TERMUX_VERSION then
-      return false
-    end
+  if vim.fn.has('termux') == 0 and not vim.env.TERMUX_VERSION then
+    return false
   end
 
   if vim.fn.executable('termux-battery-status') == 0 then
