@@ -87,7 +87,7 @@ end
 ---@return boolean supported
 ---@return string? reason
 function M.check()
-  if vim.fn.has('linux') == 0 then
+  if vim.fn.has('linux') == 0 or vim.fn.has('termux') == 1 or vim.env.TERMUX_VERSION then
     return false
   elseif not file.is_readable_directory('/sys/class/power_supply/') then
     return false, '`/sys/class/power_supply/` is not readable. This Linux system may be non-standard.'
