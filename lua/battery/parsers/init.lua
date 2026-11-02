@@ -3,7 +3,7 @@ local M = {}
 ---@module 'battery.battery'
 
 ---@class battery.ParserModule
----@field check fun(): boolean
+---@field check fun(): boolean, string? # Check that the parser would work in the current environment.
 ---@field get_battery_info_job fun(battery_status: battery.Status): any
 
 ---@type table<string, battery.ParserModule>

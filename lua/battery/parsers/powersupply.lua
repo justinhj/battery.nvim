@@ -82,10 +82,18 @@ function M.get_battery_info_job(battery_status)
   end)
 end
 
----Check if this parser would work in the current environment
----@return boolean
+---Check if this parser is supported in the current environment.
+---Additionally returns a `reason` if the OS is correct, but it isn't supported for another reason.
+---@return boolean supported
+---@return string? reason
 function M.check()
-  return file.is_readable_directory('/sys/class/power_supply/')
+  if vim.fn.has('linux') == 0 then
+    return false
+  elseif not file.is_readable_directory('/sys/class/power_supply/') then
+    return false, '`/sys/class/power_supply/` is not readable. This Linux system may be non-standard.'
+  else
+    return true
+  end
 end
 
 return M

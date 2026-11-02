@@ -16,7 +16,15 @@ function M.check()
   if check_method() then
     ok('Using ' .. B.get_method() .. '')
   else
-    error('No method found.')
+    local parsers = require('battery.parsers')
+    local advice = {}
+    for method, parser_module in pairs(parsers.parsers) do
+      local success, reason = parser_module.check()
+      if not success and reason then
+        table.insert(advice, #advice + 1, ('%s: %s'):format(method, reason))
+      end
+    end
+    error('No method found.', advice)
   end
 end
 

@@ -32,10 +32,29 @@ function M.get_battery_info_job(battery_status)
   end)
 end
 
----Check if this parser would work in the current environment
----@return boolean
+---Check if this parser is supported in the current environment.
+---Additionally returns a `reason` if the OS is correct, but it isn't supported for another reason.
+---@return boolean supported
+---@return string? reason
 function M.check()
-  return vim.fn.executable('termux-battery-status') == 1
+  if vim.fn.has('nvim-0.12') == 1 then
+    -- In Neovim >= 0.12, use the built-in `has(...)` check
+    if vim.fn.has('termux') == 0 then
+      return false
+    end
+  else
+    -- In Neovim < 0.12, check for the presence of an environment variable
+    if not vim.env.TERMUX_VERSION then
+      return false
+    end
+  end
+
+  if vim.fn.executable('termux-battery-status') == 0 then
+    return false,
+      '`termux-battery-status` is not executable. Install the Termux:API package (see: https://wiki.termux.com/wiki/Termux-battery-status).'
+  else
+    return true
+  end
 end
 
 return M

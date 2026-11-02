@@ -94,10 +94,18 @@ function M.get_battery_info_job(battery_status)
   end)
 end
 
----Check if this parser would work in the current environment
----@return boolean
+---Check if this parser is supported in the current environment.
+---Additionally returns a `reason` if the OS is correct, but it isn't supported for another reason.
+---@return boolean supported
+---@return string? reason
 function M.check()
-  return (vim.fn.has('win32') == 1 and vim.fn.executable('powershell') == 1)
+  if vim.fn.has('win32') == 0 then
+    return false
+  elseif vim.fn.executable('powershell') == 0 then
+    return false, '`powershell` is not executable. There may be a problem with your $PATH.'
+  else
+    return true
+  end
 end
 
 return M

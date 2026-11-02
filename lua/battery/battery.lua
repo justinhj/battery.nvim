@@ -42,7 +42,12 @@ local function check_low_battery_notification()
 
   -- Nothing to warn about: no data yet, no battery, or on AC power.
   -- Reset so notifications re-arm for the next discharge.
-  if battery_status.battery_count == nil or battery_status.battery_count == 0 or battery_status.ac_power or percent == nil then
+  if
+    battery_status.battery_count == nil
+    or battery_status.battery_count == 0
+    or battery_status.ac_power
+    or percent == nil
+  then
     notified_level = 'none'
     return
   end
